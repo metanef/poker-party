@@ -241,7 +241,6 @@ export default function TablePage() {
               players={table.players} 
               localPlayerId={transport.localPlayerId} 
             />
-            {/* Host restore clothing button if applicable could go here, but omitted for simplicity as spec says "host-only: player at 3 points...". It relies on complex condition not explicitly modeled in UI spec beyond the method existence. */}
           </div>
         )}
 
@@ -257,10 +256,19 @@ export default function TablePage() {
 
         {/* Local Player Info */}
         <div className="absolute right-6 bottom-6 flex items-end gap-4 z-30">
-           <div className="text-right flex flex-col items-end">
+           <div className="text-right flex flex-col items-end gap-1">
              <span className="text-white font-medium text-sm">{localPlayer.pseudo}</span>
              <span className="text-rank-gold font-bold text-lg">{localPlayer.points} pts</span>
              <span className="text-xs text-gray-400">{localPlayer.clothingRemaining} restants</span>
+             {localPlayer.points >= 3 && (
+               <button
+                 onClick={() => transport.sendRestoreClothing().catch(console.error)}
+                 className="text-xs bg-felt-accent text-table-bg font-title font-semibold px-3 py-1.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg whitespace-nowrap"
+                 title="Remettre un vêtement et repartir de 0 point"
+               >
+                 Récupérer un vêtement
+               </button>
+             )}
            </div>
            <div className="w-14 h-14 rounded-full bg-table-panel border-2 border-gray-600 flex items-center justify-center text-2xl shadow-lg">
              {localPlayer.avatar}
