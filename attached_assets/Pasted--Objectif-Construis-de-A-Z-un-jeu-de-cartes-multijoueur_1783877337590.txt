@@ -1,0 +1,294 @@
+## Objectif
+ 
+Construis, de A à Z, un jeu de cartes multijoueur (2 à 4 joueurs) inspiré du Texas
+Hold'em mais **sans aucun système de mise, de jeton ou de pot**. L'enjeu de chaque
+manche n'est pas de l'argent virtuel mais **un vêtement par joueur**, représenté
+uniquement par un compteur textuel (jamais par une image, une vidéo ou une
+représentation graphique du joueur — voir la section Consentement et sécurité).
+ 
+Il doit y avoir un **vrai multijoueur temps réel entre plusieurs appareils** : un joueur
+crée une table, obtient un lien d'invitation, l'envoie à un ou plusieurs amis, et
+chacun rejoint **la même manche en direct** sur son propre appareil.
+ 
+**Livrable attendu : le code source complet et fonctionnel du projet** (pas seulement un
+plan ou une description) : arborescence de fichiers, composants, logique, tests, config
+de build, workflow de déploiement, et un `README.md` expliquant comment tout faire
+tourner et déployer.
+ 
+## Contrainte non négociable : hébergement 100% statique (GitHub Pages)
+ 
+GitHub Pages ne sert que des fichiers statiques (HTML/JS/CSS) : impossible d'y faire
+tourner un serveur Node/Express/Socket.io. Pour obtenir malgré tout un vrai multijoueur
+temps réel entre appareils différents, utilise un service de synchronisation temps réel
+gratuit, appelé uniquement en JavaScript depuis le navigateur :
+ 
+- **Firebase Realtime Database** (recommandé — plan gratuit "Spark", sans carte
+  bancaire requise, largement suffisant pour un jeu entre amis) + **Firebase
+  Authentication en mode anonyme** (gratuite, illimitée, pour obtenir un identifiant
+  stable par appareil sans compte à créer).
+- Alternative acceptable si tu préfères : **Supabase Realtime** (channels broadcast,
+  plan gratuit équivalent).
+- Aucune fonction serveur (Cloud Functions / Edge Functions) n'est nécessaire.
+### Modèle retenu : "hôte autoritaire côté client"
+ 
+- Le joueur qui crée la table devient l'**hôte** : son navigateur fait tourner la
+  logique du jeu et est la seule source de vérité de la manche en cours.
+- Les autres joueurs n'envoient que des **intentions** (voir "Actions possibles"
+  ci-dessous) via la base temps réel ; ils ne calculent jamais eux-mêmes l'état du jeu.
+- L'hôte écoute ces intentions, les valide, met à jour l'état, puis republie l'état
+  public de la table (cartes des autres joueurs masquées) ; tous les clients, y compris
+  l'hôte, affichent uniquement ce qui est lu depuis la base.
+- **Limite assumée**, à documenter clairement et honnêtement dans le `README.md` : ce
+  modèle convient à une partie amicale entre personnes de confiance, sans garantie
+  anti-triche de niveau "serveur indépendant". Si l'hôte quitte la partie en cours,
+  affiche un message clair invitant à recréer une table (pas de bascule automatique
+  d'hôte pour cette première version).
+## Règles du jeu (remplacent entièrement les mises du Texas Hold'em classique)
+ 
+Pas de jetons, pas de mises, pas de blinds, pas de pot, pas de tour de parole basé sur
+l'argent. Chaque joueur reçoit 2 cartes privées. Le jeu se déroule en **étapes fixes et
+identiques pour tout le monde**, sans ordre de passage à respecter : à chaque tour de
+change, tous les joueurs actifs décident **simultanément** (avec un temps limite, ex. 20
+secondes ; passé ce délai, un joueur qui n'a pas répondu est considéré comme ayant
+choisi "Continuer sans changer").
+ 
+**Actions possibles à chaque tour de change :**
+- **Changer une ou plusieurs cartes** : le joueur sélectionne 1 ou 2 de ses cartes
+  privées, elles sont défaussées et remplacées par de nouvelles cartes tirées de la
+  pioche.
+- **Continuer sans changer** : le joueur garde ses cartes privées actuelles.
+**Déroulé exact d'une manche (respecte précisément cet ordre) :**
+1. Distribution des 2 cartes privées à chaque joueur.
+2. Découverte des 3 premières cartes de la rivière (équivalent du "flop").
+3. 1er tour de change (voir "Actions possibles" ci-dessus).
+4. Découverte de la 4e carte de la rivière (équivalent du "turn").
+5. 2e tour de change.
+6. Découverte de la 5e et dernière carte de la rivière (équivalent de la "river").
+7. 3e tour de change.
+8. Abattage : révélation des mains de tous les joueurs, comparaison selon les règles
+   standard du poker (meilleure combinaison sur les 2 cartes privées + 5 cartes
+   communes), désignation d'un gagnant et d'un perdant.
+**Résolution de fin de manche :**
+- Le joueur avec la meilleure main gagne **1 point**.
+- Le joueur avec la plus faible main est désigné comme le perdant de la manche ; un
+  message textuel clair lui indique de retirer un vêtement (ex. "Vous perdez cette
+  manche — retirez un vêtement"). Ce message est **uniquement du texte**, jamais une
+  image ou une vidéo.
+- S'il y a 3 ou 4 joueurs à table, les joueurs ni premiers ni derniers ne subissent
+  aucun effet cette manche (pas de gain de point, pas de perte de vêtement).
+- En cas d'égalité stricte pour la meilleure ou la moins bonne main, aucun point n'est
+  attribué et personne ne retire de vêtement pour cette manche (règle de simplicité,
+  à documenter dans le `README.md`).
+- Dès qu'un joueur atteint **3 points**, il peut choisir de **remettre un vêtement**
+  qu'il avait précédemment retiré ; son compteur de points revient alors à 0.
+- Chaque joueur commence avec un nombre fixe de vêtements "en jeu" (rends ce nombre
+  configurable à la création de la table, avec une valeur par défaut raisonnable, ex.
+  6). Si un joueur atteint 0 vêtement restant, affiche un message de fin clair pour
+  cette table (par ex. "{pseudo} n'a plus de vêtement à retirer") et propose de créer
+  une nouvelle table ; l'application ne gère aucune conséquence au-delà de ce message.
+- Une nouvelle manche démarre automatiquement après un court délai d'affichage du
+  résultat (nouvelle distribution, nouvelles cartes de rivière), sauf si la table est
+  arrivée à l'état de fin décrit ci-dessus.
+**Ce qu'il ne faut surtout pas faire :** ne génère, n'affiche et ne demande jamais
+d'image, de photo ou de vidéo d'une personne réelle à aucun moment. L'intégralité de la
+mécanique de vêtements doit rester un **compteur textuel abstrait**, jamais une
+représentation visuelle des joueurs.
+ 
+## Consentement et sécurité (obligatoire, ne pas simplifier cette partie)
+ 
+- Avant que la partie ne démarre, **chaque joueur** (y compris l'hôte) doit passer par
+  un écran de consentement explicite qui rappelle : le jeu comporte un enjeu de
+  vêtements entre adultes consentants, l'application n'affiche et ne transmet jamais de
+  photo ou de vidéo, chacun peut mettre la partie en pause ou quitter à tout moment. Le
+  joueur doit confirmer explicitement être majeur et consentir librement, pour cette
+  table uniquement.
+- Un bouton "Pause" doit être visible en permanence pendant la partie et interrompre
+  toute nouvelle manche tant qu'il n'est pas désactivé.
+- N'implémente ni caméra, ni upload de photo, ni composant vidéo nulle part dans
+  l'application.
+## Direction visuelle détaillée (à respecter précisément)
+ 
+Design sombre et épuré façon app mobile de cartes moderne, à réaliser en React +
+TypeScript + Tailwind CSS.
+ 
+**Palette et tokens Tailwind :**
+```
+table-bg:      #0B0B0E   (fond du panneau de jeu)
+table-panel:   #17171C   (cartes/panneaux secondaires : zone d'action, modales)
+table-border:  #26262E   (bordures fines de tous les panneaux sombres)
+felt-accent:   #3DD9C4   (accent vert-bleu : bouton de confirmation, halo du joueur actif)
+chip-gold:     #F2C94C   (anneau du minuteur de tour de change)
+rank-gold/silver/bronze: #FFD166 / #C9CDD6 / #CD8A4E (si besoin d'accents ponctuels)
+```
+- Rayons : `rounded-card` ≈ 8px pour les cartes à jouer, `rounded-panel` ≈ 32px pour les
+  grands panneaux (table, modales, cartes de lobby), `rounded-full`/pill pour les
+  boutons d'action.
+- Fond général de l'app (hors panneau de jeu) : dégradé pastel clair type
+  `radial-gradient` bleu ciel → vert menthe → jaune citron très doux, qui contraste avec
+  le panneau de jeu noir/anthracite posé dessus.
+- Police : une sans-serif arrondie et douce pour les titres (ex. Poppins), une
+  sans-serif neutre pour le texte courant (ex. Inter).
+**Composants et leur apparence :**
+- **Cartes à jouer** : fond blanc, coins arrondis (~8px), rang en haut à gauche (rouge
+  pour cœur/carreau, noir/anthracite pour pique/trèfle), symbole de la couleur en bas à
+  droite. Dos de carte : fond sombre avec motif hachuré diagonal répété (chevrons gris
+  sur fond anthracite), jamais une simple couleur unie.
+- **Sélection de cartes à changer** : en tapant sur une de ses cartes privées, elle se
+  surélève légèrement et un contour turquoise (`felt-accent`) apparaît pour indiquer
+  qu'elle est sélectionnée pour l'échange.
+- **Sièges joueurs** : avatar rond (emoji), nom en petit texte gris clair juste en
+  dessous, puis un indicateur de **points** (ex. petit badge "2/3") et de **vêtements
+  restants** (ex. "4 restants") sous le nom. Un anneau turquoise entoure l'avatar du ou
+  des joueurs qui n'ont pas encore validé le tour de change en cours.
+- **Minuteur de tour de change** : anneau circulaire fin qui se vide progressivement
+  (SVG, `stroke-dashoffset` animé), avec le nombre de secondes restantes au centre.
+- **Zone d'action** (remplace la console de mises) : deux boutons en forme de pilule,
+  "Changer les cartes sélectionnées" (actif seulement si au moins une carte est
+  sélectionnée) et "Continuer sans changer".
+- **Emotes** : petite bulle emoji qui apparaît au-dessus du siège du joueur et remonte en
+  s'estompant (animation "pop" verticale de ~1,5s), déclenchée par une rangée de boutons
+  emoji sous les cartes du joueur.
+- **Résultat de manche** : bandeau ou modale sobre annonçant le gagnant (+1 point) et,
+  séparément, le message textuel neutre destiné au perdant ("Retirez un vêtement").
+- **Lobby** : simple liste de tables actives (nom, nombre de joueurs présents/attendus),
+  sans aucun élément de classement ni de statistique compétitive — **pas de
+  leaderboard**.
+- **Écran de salle d'attente multijoueur** : liste des joueurs déjà connectés (avatar +
+  pseudo + statut "prêt"/"en attente"), code de table bien visible et copiable, bouton
+  "Copier le lien d'invitation", et pour l'hôte uniquement un bouton "Démarrer la
+  partie" désactivé tant qu'il n'y a pas au moins 2 joueurs.
+Toute l'interface doit être en **français** (textes de boutons, labels, messages
+d'erreur, etc.).
+ 
+## Architecture technique attendue
+ 
+```
+/src
+  /engine
+    model/          Card, Deck, Player (cartes privées, points, vêtements restants),
+                     Table (état de la manche : rivière, étape en cours) — types purs,
+                     sans dépendance UI/réseau, sans pot ni mise
+    rules/          HandEvaluator (évaluation des 7 cartes disponibles, kickers, quinte
+                     basse A-2-3-4-5), ExchangeRules (validation d'un choix d'échange)
+    fsm/            machine à états des 8 étapes décrites plus haut, dans l'ordre exact
+    GameEngine.ts    façade : startHand(), applyExchangeChoice(), résolution de
+                     l'abattage (gagnant/perdant, points, vêtements)
+  /realtime
+    ITableTransport.ts        interface commune : join, leave, sendExchangeChoice,
+                               sendEmote, subscribe(listener) — l'UI ne dépend que de
+                               cette interface
+    LocalTableTransport.ts    mode solo + IA locale (bots), pour tester/jouer sans ami
+                               disponible, entièrement local au navigateur
+    FirebaseTableTransport.ts implémente ITableTransport via Firebase Realtime Database,
+                               selon le modèle "hôte autoritaire côté client" décrit plus
+                               haut
+  /ui
+    components/     Table, PlayerSeat (points + vêtements restants), PlayingCard,
+                     ExchangeConsole (sélection de cartes + les deux boutons d'action),
+                     TurnTimer, EmotePicker, HandResultBanner, Lobby (liste de tables,
+                     sans leaderboard), WaitingRoom (liste des joueurs, code, bouton
+                     copier le lien, bouton démarrer), ConsentModal
+    hooks/          useTableSocket (branche l'UI sur le transport actif, local ou
+                     Firebase)
+    pages/          LobbyPage, WaitingRoomPage, TablePage
+```
+ 
+Point clé d'architecture : `FirebaseTableTransport` et `LocalTableTransport` doivent
+implémenter **strictement la même interface** `ITableTransport`, pour que les composants
+UI n'aient aucune différence de code entre le mode solo (contre des IA) et le mode
+multijoueur réel (avec un ami à distance).
+ 
+## Flux d'invitation (fonctionnalité centrale de cette version)
+ 
+1. Le joueur A ouvre l'app, saisit un pseudo, clique **"Créer une table"**, choisit une
+   taille (2 à 4 joueurs) et le nombre de vêtements de départ. L'app génère un **code
+   court unique** (ex. `AB3K9`, 5 caractères alphanumériques) et crée les nœuds
+   correspondants dans Firebase Realtime Database sous `/rooms/AB3K9/...`. Une URL de
+   partage est générée, du type `https://<utilisateur>.github.io/<repo>/#/table/AB3K9`.
+2. Le joueur A copie ce lien (bouton dédié, avec retour visuel "Copié") et l'envoie à un
+   ou plusieurs amis par le moyen de son choix (en dehors de l'app).
+3. Chaque ami ouvre le lien sur son propre appareil, saisit son pseudo, passe par
+   l'écran de consentement (voir plus haut), puis rejoint automatiquement la table
+   `AB3K9` : sa présence est écrite dans `/rooms/AB3K9/players/{sonId}`.
+4. Tant que la partie n'a pas démarré, tous les participants voient l'écran de **salle
+   d'attente** en temps réel. L'hôte peut cliquer **"Démarrer la partie"** dès que 2
+   joueurs minimum sont présents et ont validé le consentement.
+5. Une fois démarrée, chaque joueur ne voit que ses propres cartes privées (voir
+   sécurité ci-dessous) ; celles des autres sont affichées dos face cachée jusqu'à
+   l'abattage.
+6. Si un joueur non-hôte se déconnecte, son siège passe en attente ; à l'expiration
+   d'un court délai de grâce, ses cartes restent inchangées pour le tour en cours (il
+   est considéré comme ayant choisi "Continuer sans changer"). Il peut se reconnecter au
+   même siège en rouvrant le même lien.
+## Sécurité minimale à respecter malgré l'absence de vrai serveur
+ 
+- **Ne jamais stocker toutes les mains dans un seul nœud lisible par tout le monde.**
+  Structure les données ainsi :
+  - un nœud public `/rooms/{code}/publicState` (étape en cours, cartes de rivière
+    visibles, points, vêtements restants par joueur) — sans aucune carte privée ;
+  - un nœud **privé par joueur** `/rooms/{code}/private/{playerId}/holeCards`, écrit
+    uniquement par l'hôte, et protégé par des règles de sécurité Firebase qui
+    n'autorisent la lecture qu'à l'utilisateur authentifié correspondant à ce
+    `playerId` (d'où l'usage de Firebase Auth anonyme pour obtenir un UID stable).
+- Documente explicitement dans le `README.md` que ce modèle protège des regards
+  occasionnels (empêcher un ami de voir l'écran d'un autre) mais ne protège pas d'un
+  hôte techniquement malveillant — à présenter honnêtement comme adapté à une partie
+  entre amis de confiance, pas comme une solution anti-triche de niveau professionnel.
+## Exigences fonctionnelles du moteur de jeu
+ 
+- Machine à états stricte sur les 8 étapes décrites plus haut, dans cet ordre exact,
+  sans étape sautée ni réordonnée.
+- Évaluateur de mains correct sur les 7 cartes disponibles (2 privées + 5 communes),
+  avec gestion des égalités par kickers et de la quinte basse A-2-3-4-5.
+- Validation stricte de chaque choix d'échange : un joueur ne peut échanger que ses
+  propres cartes privées, uniquement pendant un tour de change actif, et au maximum ses
+  2 cartes.
+- Aucune décision de règle chez les joueurs non-hôtes : ils affichent un état reçu et
+  envoient des intentions, jamais de calcul de logique de jeu.
+- Écris des **tests unitaires** (Vitest ou équivalent) pour l'évaluateur de mains, pour
+  le déroulé complet d'une manche (8 étapes, désignation gagnant/perdant), et pour la
+  règle des 3 points (remise d'un vêtement), exécutables en local sans dépendre de
+  Firebase.
+## Stack technique précise
+ 
+- React 19 + TypeScript, bundlé avec Vite.
+- Tailwind CSS (v4 ou v3, au choix, du moment que les tokens ci-dessus sont respectés).
+- Zustand (ou équivalent léger) pour l'état de session/lobby côté client.
+- Firebase SDK (`firebase/app`, `firebase/database`, `firebase/auth`) pour la
+  synchronisation temps réel et l'authentification anonyme.
+- Vitest pour les tests unitaires du moteur de jeu.
+- `lucide-react` pour les icônes.
+## Déploiement
+ 
+1. Crée un projet Firebase gratuit, active **Realtime Database** et
+   **Authentication → Connexion anonyme**.
+2. Intègre la configuration Firebase (clé API publique — normal et sans risque pour ce
+   type de config côté client) dans le code du frontend, idéalement via des variables
+   d'environnement Vite (`import.meta.env.VITE_FIREBASE_*`).
+3. Fournis un workflow **GitHub Actions** qui, à chaque push sur `main` : installe les
+   dépendances, exécute les tests, build le projet (`npm run build`), puis publie le
+   contenu de `dist/` sur GitHub Pages.
+4. Adapte le champ `base` de `vite.config.ts` pour qu'il corresponde au nom du dépôt
+   GitHub cible.
+5. Rédige un `README.md` complet et autonome expliquant, étape par étape : comment créer
+   le projet Firebase, où renseigner sa configuration, comment lancer le projet en local
+   (`npm install`, `npm run dev`, `npm run test`), et comment activer GitHub Pages dans
+   les paramètres du dépôt (source : GitHub Actions).
+## Critères d'acceptation
+ 
+- Deux navigateurs différents, sur deux réseaux différents, peuvent rejoindre la même
+  table via un lien hébergé sur GitHub Pages et jouer une manche complète ensemble en
+  temps réel (les 8 étapes, dans l'ordre), sans qu'aucun serveur n'ait été déployé par
+  ailleurs qu'un projet Firebase gratuit.
+- Un rechargement de page reconnecte un joueur non-hôte à sa partie en cours sans perdre
+  son siège, ses points ni son nombre de vêtements restants.
+- Aucun joueur ne peut lire les cartes privées d'un autre joueur via les outils de
+  développement du navigateur (à vérifier via les règles de sécurité Firebase Realtime
+  Database).
+- Le compteur de points et la règle des 3 points (remise d'un vêtement) fonctionnent
+  correctement sur plusieurs manches consécutives.
+- Aucun composant caméra, upload de photo ou lecteur vidéo n'existe nulle part dans le
+  code.
+- `npm run test` passe pour le moteur de jeu avant tout déploiement.
+- L'interface respecte la direction visuelle décrite plus haut (couleurs, formes,
+  typographie), ne comporte pas de leaderboard, et est entièrement en français.

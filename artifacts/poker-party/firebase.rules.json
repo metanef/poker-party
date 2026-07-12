@@ -1,0 +1,30 @@
+{
+  "rules": {
+    "tables": {
+      "$code": {
+        "public": {
+          ".read": "auth != null",
+          ".write": "auth != null && data.child('hostId').val() === auth.uid"
+        },
+        "private": {
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && root.child('tables').child($code).child('public').child('hostId').val() === auth.uid"
+          }
+        },
+        "intents": {
+          "$uid": {
+            ".read": "auth != null && root.child('tables').child($code).child('public').child('hostId').val() === auth.uid",
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        },
+        "emotes": {
+          "$uid": {
+            ".read": "auth != null",
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        }
+      }
+    }
+  }
+}
