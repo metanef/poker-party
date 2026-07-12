@@ -47,6 +47,15 @@ export class LocalTableTransport implements ITableTransport {
   private table: TableState | null = null;
   private deck: Deck | null = null;
   private timers: ReturnType<typeof setTimeout>[] = [];
+  /**
+   * Bumped every time a new exchange round starts (or ends early). Bot
+   * actions and the round's timeout fallback capture the generation at
+   * schedule time and no-op if it no longer matches -- otherwise a stale
+   * timer left over from a round that already finished (e.g. because
+   * everyone acted quickly) would fire later and force-finalize whatever
+   * round is current at that time, skipping it without waiting for input.
+   */
+  private exchangeGeneration = 0;
 
   private tableListeners = new Set<(table: TableState | null) => void>();
   private privateListeners = new Set<(hand: PrivateHand | null) => void>();
@@ -156,22 +165,25 @@ export class LocalTableTransport implements ITableTransport {
 
   private runExchangeRound(round: 1 | 2 | 3) {
     if (!this.table || this.table.paused) return;
+    this.exchangeGeneration += 1;
+    const generation = this.exchangeGeneration;
     this.table = beginExchangeRound(this.table, round, Date.now(), EXCHANGE_TIMEOUT_MS);
     this.notifyTable();
-    this.scheduleBotActions();
-    this.schedule(() => this.checkExchangeRoundCompletion(round), EXCHANGE_TIMEOUT_MS + 250);
+    this.scheduleBotActions(generation);
+    this.schedule(() => this.checkExchangeRoundCompletion(generation), EXCHANGE_TIMEOUT_MS + 250);
   }
 
-  private scheduleBotActions() {
+  private scheduleBotActions(generation: number) {
     if (!this.table || !this.deck) return;
     for (const player of this.table.players) {
       if (player.id === this.localPlayerId || !player.active) continue;
       const delay = 1500 + Math.random() * (EXCHANGE_TIMEOUT_MS - 3000);
-      this.schedule(() => this.applyBotChoice(player.id), delay);
+      this.schedule(() => this.applyBotChoice(player.id, generation), delay);
     }
   }
 
-  private applyBotChoice(playerId: string) {
+  private applyBotChoice(playerId: string, generation: number) {
+    if (generation !== this.exchangeGeneration) return; // round already ended
     if (!this.table || !this.deck) return;
     const player = this.table.players.find((p) => p.id === playerId);
     if (!player || player.hasActedThisRound) return;
@@ -199,13 +211,17 @@ export class LocalTableTransport implements ITableTransport {
     }
   }
 
-  private checkExchangeRoundCompletion(_round: 1 | 2 | 3) {
+  private checkExchangeRoundCompletion(generation: number) {
+    if (generation !== this.exchangeGeneration) return; // round already ended earlier
     if (!this.table) return;
     this.finishExchangeRound();
   }
 
   private finishExchangeRound() {
     if (!this.table || !this.deck) return;
+    // Invalidate any still-pending timers (bot actions, timeout fallback)
+    // from this round so they can't fire again after we've already moved on.
+    this.exchangeGeneration += 1;
     this.table = finalizeExchangeRound(this.table);
     const stageBeforeAdvance = this.table.stage;
     this.table = advancePastExchange(this.table, this.deck);
