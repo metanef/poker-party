@@ -1,8 +1,8 @@
 {
   "rules": {
     "lobby": {
+      ".read": "auth != null",
       "$code": {
-        ".read": "auth != null",
         ".write": "auth != null && ((data.exists() && data.child('hostId').val() === auth.uid) || (!data.exists() && newData.child('hostId').val() === auth.uid))"
       }
     },
