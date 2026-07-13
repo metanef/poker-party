@@ -65,16 +65,19 @@ export default function TablePage() {
 
   // Round start announcement effect
   useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
     if (table && table.stage !== 'lobby' && table.handNumber > 0) {
       if (lastAnnouncedHand.current !== table.handNumber) {
         lastAnnouncedHand.current = table.handNumber;
         setShowRoundAnnounce(true);
-        const timer = setTimeout(() => {
+        timer = setTimeout(() => {
           setShowRoundAnnounce(false);
         }, 2200);
-        return () => clearTimeout(timer);
       }
     }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [table?.handNumber]);
 
   const handleJoin = async (e: React.FormEvent) => {

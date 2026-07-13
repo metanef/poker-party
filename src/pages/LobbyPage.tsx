@@ -66,21 +66,21 @@ export default function LobbyPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] w-full flex flex-col items-center py-12 px-4 relative overflow-hidden">
+    <div className="min-h-[100dvh] w-full flex flex-col items-center py-6 md:py-12 px-4 relative overflow-x-hidden">
       {/* Decorative background elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-300/20 blur-3xl" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-yellow-200/20 blur-3xl" />
       
-      <div className="text-center mb-10 z-10">
-        <h1 className="font-title text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-3">
+      <div className="text-center mb-6 md:mb-10 z-10">
+        <h1 className="font-title text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-2 md:mb-3">
           Poker<span className="text-teal-500">Party</span>
         </h1>
-        <p className="text-gray-600 max-w-sm mx-auto font-medium">
+        <p className="text-gray-600 max-w-sm mx-auto font-medium text-sm md:text-base">
           Le jeu de cartes entre amis où chaque vêtement compte.
         </p>
       </div>
 
-      <div className="w-full max-w-4xl grid md:grid-cols-2 gap-8 z-10">
+      <div className="w-full max-w-4xl grid md:grid-cols-2 gap-6 md:gap-8 z-10">
         {/* Left Column: Identity & Create */}
         <div className="space-y-6">
           {/* Profile Card */}
@@ -105,7 +105,7 @@ export default function LobbyPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">Avatar</label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                   {EMOJIS.map(em => (
                     <button
                       key={em}
@@ -131,7 +131,7 @@ export default function LobbyPage() {
             <h2 className="font-title text-xl font-semibold text-gray-900 mb-6">Créer une table</h2>
             
             <form onSubmit={handleCreate} className="space-y-5 relative z-10">
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-600 mb-2">Joueurs max</label>
                   <select 
@@ -172,19 +172,19 @@ export default function LobbyPage() {
           <div className="bg-white/80 backdrop-blur-md rounded-panel p-6 shadow-xl border border-white/50">
             <h2 className="font-title text-xl font-semibold text-gray-900 mb-6">Rejoindre via un code</h2>
             
-            <form onSubmit={handleJoin} className="flex gap-3">
+            <form onSubmit={handleJoin} className="flex flex-col sm:flex-row gap-3">
               <input 
                 type="text"
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 placeholder="Ex: ABCDEF"
-                className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-mono text-center tracking-widest placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 uppercase"
+                className="w-full sm:flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-mono text-center tracking-widest placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 uppercase"
                 maxLength={6}
               />
               <button 
                 type="submit"
                 disabled={!pseudo.trim() || joinCode.length < 3 || isLoading}
-                className="bg-gray-900 text-white font-title font-semibold rounded-xl px-6 hover:bg-gray-800 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto bg-gray-900 text-white font-title font-semibold rounded-xl py-3 px-6 hover:bg-gray-800 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Rejoindre
               </button>
