@@ -11,7 +11,8 @@ import { EmotePicker } from '@/ui/components/EmotePicker';
 import { PauseButton } from '@/ui/components/PauseButton';
 import { HandResultBanner } from '@/ui/components/HandResultBanner';
 import { PlayingCard } from '@/ui/components/PlayingCard';
-import { LogOut, Home, UserPlus, AlertCircle } from 'lucide-react';
+import { SidebarChat } from '@/ui/components/SidebarChat';
+import { LogOut, Home, UserPlus, AlertCircle, MessageSquare } from 'lucide-react';
 
 export default function TablePage() {
   const { code } = useParams<{ code: string }>();
@@ -29,6 +30,25 @@ export default function TablePage() {
 
   const lastAnnouncedHand = useRef<number | null>(null);
   const [showRoundAnnounce, setShowRoundAnnounce] = useState(false);
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const lastLogsCountRef = useRef(0);
+
+  // Monitor unread logs
+  useEffect(() => {
+    if (!table || !table.logs) return;
+    
+    if (isSidebarOpen) {
+      setUnreadCount(0);
+    } else {
+      const diff = table.logs.length - lastLogsCountRef.current;
+      if (diff > 0) {
+        setUnreadCount((prev) => prev + diff);
+      }
+    }
+    lastLogsCountRef.current = table.logs.length;
+  }, [table?.logs, isSidebarOpen]);
 
   // Check if we need to show the join form
   useEffect(() => {
@@ -178,30 +198,46 @@ export default function TablePage() {
   const localCards = privateHand?.holeCards || [];
 
   return (
-    <div className="min-h-[100dvh] bg-table-bg text-white overflow-hidden flex flex-col relative select-none">
+    <div className="min-h-[100dvh] bg-table-bg text-white overflow-hidden flex flex-row relative select-none animate-fadeIn">
       
-      {/* Top Bar */}
-      <div className="h-16 flex items-center justify-between px-6 z-20 border-b border-white/5 bg-black/20">
-        <div className="flex items-center gap-4">
-          <div className="font-mono text-sm tracking-widest text-gray-500 bg-black/40 px-3 py-1 rounded-md">
-            {table.code}
-          </div>
-          <div className="text-sm font-medium text-gray-400 capitalize">
-            {table.stage}
-          </div>
-        </div>
+      {/* Game Table (Left Side) */}
+      <div className="flex-1 flex flex-col h-[100dvh] relative overflow-hidden">
         
-        <div className="flex items-center gap-3">
-          <PauseButton paused={table.paused} isHost={table.hostId === transport.localPlayerId} />
-          <button 
-            onClick={() => { if(confirm('Quitter la partie ?')) { transport.leaveTable(); setLocation('/'); } }}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-table-panel border border-table-border text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-colors"
-            title="Quitter"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+        {/* Top Bar */}
+        <div className="h-16 flex items-center justify-between px-6 z-20 border-b border-white/5 bg-black/20">
+          <div className="flex items-center gap-4">
+            <div className="font-mono text-sm tracking-widest text-gray-500 bg-black/40 px-3 py-1 rounded-md">
+              {table.code}
+            </div>
+            <div className="text-sm font-medium text-gray-400 capitalize">
+              {table.stage}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-table-panel border border-table-border text-gray-300 hover:text-white hover:bg-white/5 transition-colors relative active:scale-95 duration-200"
+              title="Chat & Historique"
+            >
+              <MessageSquare className="w-4 h-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white border border-slate-950 animate-bounce">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            <PauseButton paused={table.paused} isHost={table.hostId === transport.localPlayerId} />
+            <button 
+              onClick={() => { if(confirm('Quitter la partie ?')) { transport.leaveTable(); setLocation('/'); } }}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-table-panel border border-table-border text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-colors active:scale-95 duration-200"
+              title="Quitter"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-      </div>
 
       {/* Main Game Area */}
       <div className="flex-1 relative flex flex-col items-center justify-between p-4">
@@ -338,6 +374,21 @@ export default function TablePage() {
               Début de la Manche {table.handNumber}
             </h2>
           </div>
+        </div>
+      )}
+
+      </div>
+
+      {/* Sidebar Chat (Right Side) */}
+      {isSidebarOpen && (
+        <div className="w-full md:w-80 h-[100dvh] absolute md:relative right-0 top-0 z-[70] md:z-20 transition-all duration-300">
+          <SidebarChat 
+            logs={table.logs || []}
+            localPlayerId={transport.localPlayerId}
+            hostId={table.hostId}
+            onSendMessage={(msg) => transport.sendChatMessage(msg)}
+            onClose={() => setIsSidebarOpen(false)}
+          />
         </div>
       )}
 

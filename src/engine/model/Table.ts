@@ -12,6 +12,16 @@ export interface HandResult {
   handLabels: Record<string, string>;
 }
 
+export interface LogMessage {
+  id: string;
+  timestamp: number;
+  type: 'system' | 'chat';
+  playerId?: string;
+  playerName?: string;
+  playerAvatar?: string;
+  content: string;
+}
+
 export interface TableState {
   code: string;
   hostId: string;
@@ -31,6 +41,7 @@ export interface TableState {
   gameOverMessage: string | null;
   deckSize: number;
   createdAt: number;
+  logs: LogMessage[];
 }
 
 export function createEmptyTable(params: {
@@ -56,5 +67,6 @@ export function createEmptyTable(params: {
     gameOverMessage: null,
     deckSize: 52,
     createdAt: params.createdAt,
+    logs: [],
   };
 }

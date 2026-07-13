@@ -12,6 +12,7 @@ import {
   restoreClothing,
   resumeTable,
   startHand,
+  addLog,
 } from '../engine/GameEngine';
 import { Deck } from '../engine/model/Deck';
 import { createPlayer, type ExchangeChoice, type Player } from '../engine/model/Player';
@@ -169,6 +170,7 @@ export class LocalTableTransport implements ITableTransport {
     if (this.table.players.length < 2) return;
     this.deck = Deck.shuffled();
     this.table = startHand(this.table, this.deck);
+    this.table = addLog(this.table, 'system', "La partie commence ! Bon jeu à tous !");
     this.notifyTable();
     this.notifyPrivateHand();
     this.schedule(() => this.runExchangeRound(1), REVEAL_PAUSE_MS);
@@ -292,6 +294,20 @@ export class LocalTableTransport implements ITableTransport {
   async sendEmote(emoji: string): Promise<void> {
     const event: EmoteEvent = { playerId: this.localPlayerId, emoji, at: Date.now() };
     this.emoteListeners.forEach((l) => l(event));
+  }
+
+  async sendChatMessage(content: string): Promise<void> {
+    if (!this.table) return;
+    const player = this.table.players.find((p) => p.id === this.localPlayerId);
+    this.table = addLog(
+      this.table,
+      'chat',
+      content,
+      player?.pseudo || 'Joueur',
+      player?.avatar || '👤',
+      this.localPlayerId
+    );
+    this.notifyTable();
   }
 
   subscribe(listener: (table: TableState | null) => void): () => void {

@@ -28,6 +28,7 @@ import {
   restoreClothing,
   resumeTable,
   startHand,
+  addLog,
 } from '../engine/GameEngine';
 import { Deck } from '../engine/model/Deck';
 import { createPlayer, type ExchangeChoice } from '../engine/model/Player';
@@ -337,6 +338,7 @@ export class FirebaseTableTransport implements ITableTransport {
             startingClothing: this.hostTable.startingClothing,
           });
           this.hostTable.players.push(newPlayer);
+          this.hostTable = addLog(this.hostTable, 'system', `${newPlayer.pseudo} a rejoint la table.`);
           void this.hostPublish(this.hostTable);
         }
         break;
@@ -397,6 +399,22 @@ export class FirebaseTableTransport implements ITableTransport {
             void this.hostPublish(this.hostTable);
             this.scheduleHost(() => this.hostRunExchangeRound(1), REVEAL_PAUSE_MS);
           }
+        }
+        break;
+      }
+      case 'chat': {
+        const content = data.content as string;
+        const player = this.hostTable.players.find((p) => p.id === uid);
+        if (player && content) {
+          this.hostTable = addLog(
+            this.hostTable,
+            'chat',
+            content,
+            player.pseudo,
+            player.avatar,
+            uid
+          );
+          void this.hostPublish(this.hostTable);
         }
         break;
       }
@@ -669,6 +687,7 @@ export class FirebaseTableTransport implements ITableTransport {
     }
     this.hostDeck = Deck.shuffled();
     this.hostTable = startHand(this.hostTable, this.hostDeck);
+    this.hostTable = addLog(this.hostTable, 'system', "La partie commence ! Bon jeu à tous !");
     await this.hostPublish(this.hostTable);
     this.scheduleHost(() => this.hostRunExchangeRound(1), REVEAL_PAUSE_MS);
   }
@@ -734,6 +753,27 @@ export class FirebaseTableTransport implements ITableTransport {
       emoji,
       at,
     });
+  }
+
+  async sendChatMessage(content: string): Promise<void> {
+    await this.ensureAuth();
+    if (!this.currentTableCode) return;
+    
+    if (this.isHostClient && this.hostTable) {
+      const player = this.hostTable.players.find((p) => p.id === this._localPlayerId);
+      this.hostTable = addLog(
+        this.hostTable,
+        'chat',
+        content,
+        player?.pseudo || 'Joueur',
+        player?.avatar || '👤',
+        this._localPlayerId
+      );
+      await this.hostPublish(this.hostTable);
+      return;
+    }
+    
+    await this.sendIntent({ type: 'chat', content });
   }
 
   subscribe(listener: (table: TableState | null) => void): () => void {

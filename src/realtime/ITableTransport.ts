@@ -81,6 +81,9 @@ export interface ITableTransport {
   /** Sends an ephemeral emote bubble, e.g. "😅". */
   sendEmote(emoji: string): Promise<void>;
 
+  /** Sends a real-time chat message to the table. */
+  sendChatMessage(content: string): Promise<void>;
+
   /** Subscribes to the public table state (private cards excluded). */
   subscribe(listener: (table: TableState | null) => void): () => void;
 

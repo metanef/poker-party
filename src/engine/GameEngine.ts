@@ -1,7 +1,7 @@
 import { buildFullDeck, type Card } from './model/Card';
 import { Deck } from './model/Deck';
 import type { ExchangeChoice, Player } from './model/Player';
-import type { HandResult, TableState } from './model/Table';
+import type { HandResult, TableState, LogMessage } from './model/Table';
 import { HAND_STAGES, isExchangeStage, type HandStage, type Stage } from './fsm/stages';
 import { validateExchangeChoice } from './rules/ExchangeRules';
 import { compareHandStrength, describeHandFr, evaluateBestHand } from './rules/HandEvaluator';
@@ -24,7 +24,30 @@ function cloneTable(table: TableState): TableState {
     lastHandResult: table.lastHandResult
       ? { ...table.lastHandResult, handLabels: { ...table.lastHandResult.handLabels } }
       : null,
+    logs: table.logs ? [...table.logs] : [],
   };
+}
+
+export function addLog(
+  table: TableState,
+  type: 'system' | 'chat',
+  content: string,
+  playerName?: string,
+  playerAvatar?: string,
+  playerId?: string,
+): TableState {
+  const next = cloneTable(table);
+  const newLog: LogMessage = {
+    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    timestamp: Date.now(),
+    type,
+    content,
+    playerName,
+    playerAvatar,
+    playerId,
+  };
+  next.logs = [...next.logs, newLog].slice(-100);
+  return next;
 }
 
 function activePlayers(table: TableState): Player[] {
@@ -55,7 +78,7 @@ export function startHand(table: TableState, deck: Deck = Deck.shuffled()): Tabl
   next.communityCards = deck.draw(3);
   next.stage = 'flop';
   next.deckSize = deck.remaining;
-  return next;
+  return addLog(next, 'system', `Début de la Manche ${next.handNumber}.`);
 }
 
 /** Begins one of the 3 fixed exchange rounds (stages 3, 5, 7). */
@@ -104,17 +127,23 @@ export function applyExchangeChoice(
   const next = cloneTable(table);
   const nextPlayer = next.players.find((p) => p.id === playerId) as Player;
 
+  let logMsg = '';
   if (choice.type === 'change') {
     const replacements = deck.draw(choice.cardIndices.length);
     choice.cardIndices.forEach((cardIdx, i) => {
       nextPlayer.holeCards[cardIdx] = replacements[i];
     });
+    logMsg = `${player.pseudo} a changé ${choice.cardIndices.length} carte${choice.cardIndices.length > 1 ? 's' : ''}.`;
+  } else {
+    logMsg = `${player.pseudo} a gardé toutes ses cartes.`;
   }
 
   nextPlayer.hasActedThisRound = true;
   nextPlayer.lastChoice = choice;
   next.deckSize = deck.remaining;
-  return { table: next, valid: true };
+  
+  const loggedTable = addLog(next, 'system', logMsg);
+  return { table: loggedTable, valid: true };
 }
 
 /** True once every active, connected player has acted, or the deadline has passed. */
@@ -223,7 +252,32 @@ export function resolveShowdown(table: TableState): TableState {
   next.stage = 'showdown';
   next.lastHandResult = result;
   next.gameOverMessage = gameOverMessage;
-  return next;
+
+  let loggedTable = next;
+  if (winners.length > 0) {
+    const winnerNames = winners.map((w) => w.player.pseudo).join(', ');
+    const handLabel = handLabels[winners[0].player.id];
+    loggedTable = addLog(
+      loggedTable,
+      'system',
+      `${winnerNames} remporte${winners.length > 1 ? 'nt' : ''} la manche avec : ${handLabel}.`
+    );
+  }
+  
+  if (singleLoser) {
+    const loserPlayer = loggedTable.players.find((p) => p.id === losers[0].player.id) as Player;
+    loggedTable = addLog(
+      loggedTable,
+      'system',
+      `${loserPlayer.pseudo} perd la manche et retire un vêtement (👕 restants : ${loserPlayer.clothingRemaining}).`
+    );
+  }
+
+  if (gameOverMessage) {
+    loggedTable = addLog(loggedTable, 'system', `Fin de la partie : ${gameOverMessage}`);
+  }
+
+  return loggedTable;
 }
 
 /**
@@ -238,7 +292,9 @@ export function restoreClothing(table: TableState, playerId: string): TableState
   const nextPlayer = next.players.find((p) => p.id === playerId) as Player;
   nextPlayer.clothingRemaining += 1;
   nextPlayer.points -= 3;
-  return next;
+  
+  const loggedTable = addLog(next, 'system', `${player.pseudo} a racheté un vêtement (👕 +1, score : ${nextPlayer.points}).`);
+  return loggedTable;
 }
 
 export function pauseTable(table: TableState): TableState {
