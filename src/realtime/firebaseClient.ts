@@ -9,18 +9,18 @@ import { getDatabase } from 'firebase/database';
  * erreur explicite en français.
  */
 function createFirebaseApp(): FirebaseApp {
-  const apiKey = import.meta.env.VITE_FIREBASE_API_KEY as string | undefined;
-  const authDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as string | undefined;
-  const databaseURL = import.meta.env.VITE_FIREBASE_DATABASE_URL as string | undefined;
-  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined;
-  const appId = import.meta.env.VITE_FIREBASE_APP_ID as string | undefined;
+  const apiKey = (import.meta.env.VITE_FIREBASE_API_KEY as string | undefined) || 'AIzaSyCHICjg1iz6-_c26JBPuq5i2q9aU7zdt7k';
+  const authDomain = (import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as string | undefined) || 'poker-party-123a8.firebaseapp.com';
+  const databaseURL = (import.meta.env.VITE_FIREBASE_DATABASE_URL as string | undefined) || 'https://poker-party-123a8-default-rtdb.europe-west1.firebasedatabase.app';
+  const projectId = (import.meta.env.VITE_FIREBASE_PROJECT_ID as string | undefined) || 'poker-party-123a8';
+  const appId = (import.meta.env.VITE_FIREBASE_APP_ID as string | undefined) || '1:1016193433912:web:46745a0d467fa8cfb8c1cd';
 
   if (!apiKey || !authDomain || !databaseURL || !projectId || !appId) {
     throw new Error(
       'Configuration Firebase incomplète : vérifiez que les variables ' +
         'VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, ' +
         'VITE_FIREBASE_DATABASE_URL, VITE_FIREBASE_PROJECT_ID et ' +
-        'VITE_FIREBASE_APP_ID sont bien définies dans votre fichier .env.',
+        'VITE_FIREBASE_APP_ID sont bien définies dans votre fichier .env ou configurées par défaut.',
     );
   }
 

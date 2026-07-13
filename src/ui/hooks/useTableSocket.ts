@@ -15,8 +15,11 @@ let sharedTransport: ITableTransport | null = null;
  */
 export function getTransport(): ITableTransport {
   if (!sharedTransport) {
-    const hasFirebaseConfig = Boolean(import.meta.env.VITE_FIREBASE_API_KEY);
-    sharedTransport = hasFirebaseConfig
+    const params = new URLSearchParams(window.location.search);
+    const forceLocal = params.get('local') === 'true';
+    const hasFirebaseConfig = Boolean(import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyCHICjg1iz6-_c26JBPuq5i2q9aU7zdt7k');
+    
+    sharedTransport = (hasFirebaseConfig && !forceLocal)
       ? new FirebaseTableTransport()
       : new LocalTableTransport();
   }
