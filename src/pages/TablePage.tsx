@@ -207,10 +207,10 @@ export default function TablePage() {
       <div className="flex-1 relative flex flex-col items-center justify-center p-4">
         
         {/* Felt / Table Center */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[60vh] max-w-4xl border-2 border-white/5 rounded-full bg-white/[0.02] shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] h-[35vh] sm:w-[80vw] sm:h-[60vh] max-w-4xl border-2 border-white/5 rounded-full bg-white/[0.02] shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] pointer-events-none" />
 
         {/* Opponents Layout (Top half circle) */}
-        <div className="w-full max-w-3xl flex justify-around items-end absolute top-12 z-10">
+        <div className="w-full max-w-3xl flex justify-around items-end absolute top-6 sm:top-12 px-2 sm:px-0 z-10">
           {opponents.map((p) => (
             <PlayerSeat 
               key={p.id} 
@@ -221,15 +221,15 @@ export default function TablePage() {
         </div>
 
         {/* Center Table Area (Community Cards & Pot/Timer) */}
-        <div className="relative z-10 flex flex-col items-center gap-8 mt-12">
+        <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-8 mt-6 sm:mt-12 scale-90 sm:scale-100">
           {/* Community Cards */}
-          <div className="flex items-center gap-2 h-36">
+          <div className="flex items-center gap-1.5 sm:gap-2 h-28 sm:h-36">
             {table.communityCards.map((card, i) => (
               <PlayingCard key={i} card={card} size="md" className="shadow-2xl" />
             ))}
             {/* Empty slots for visual structure during dealing/flop */}
             {Array.from({ length: 5 - table.communityCards.length }).map((_, i) => (
-              <div key={`empty-${i}`} className="w-16 h-24 rounded-card border-2 border-dashed border-white/10" />
+              <div key={`empty-${i}`} className="w-12 h-18 sm:w-16 sm:h-24 rounded-card border-2 border-dashed border-white/10" />
             ))}
           </div>
 
@@ -278,22 +278,22 @@ export default function TablePage() {
         </div>
 
         {/* Local Player Info */}
-        <div className="absolute right-6 bottom-6 flex items-end gap-4 z-30">
-           <div className="text-right flex flex-col items-end gap-1">
-             <span className="text-white font-medium text-sm">{localPlayer.pseudo}</span>
-             <span className="text-rank-gold font-bold text-lg">{localPlayer.points} pts</span>
-             <span className="text-xs text-gray-400">👕 {localPlayer.clothingRemaining} restant{localPlayer.clothingRemaining > 1 ? 's' : ''}</span>
+        <div className="absolute right-4 bottom-4 md:right-6 md:bottom-6 flex items-end gap-2 md:gap-4 z-30 scale-90 sm:scale-100 origin-bottom-right">
+           <div className="text-right flex flex-col items-end gap-0.5 md:gap-1">
+             <span className="text-white font-medium text-xs md:text-sm">{localPlayer.pseudo}</span>
+             <span className="text-rank-gold font-bold text-sm md:text-lg">{localPlayer.points} pts</span>
+             <span className="text-[10px] md:text-xs text-gray-400">👕 {localPlayer.clothingRemaining} restant{localPlayer.clothingRemaining > 1 ? 's' : ''}</span>
              {localPlayer.points >= 3 && (
                <button
                  onClick={() => transport.sendRestoreClothing().catch(console.error)}
-                 className="text-xs bg-felt-accent text-table-bg font-title font-semibold px-3 py-1.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg whitespace-nowrap"
+                 className="text-[10px] md:text-xs bg-felt-accent text-table-bg font-title font-semibold px-2 md:px-3 py-1 md:py-1.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg whitespace-nowrap"
                  title="Remettre un vêtement et repartir de 0 point"
                >
                  Récupérer un vêtement
                </button>
              )}
            </div>
-           <div className="w-14 h-14 rounded-full bg-table-panel border-2 border-gray-600 flex items-center justify-center text-2xl shadow-lg">
+           <div className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-table-panel border-2 border-gray-600 flex items-center justify-center text-xl md:text-2xl shadow-lg">
              {localPlayer.avatar}
            </div>
         </div>
@@ -307,7 +307,7 @@ export default function TablePage() {
                hasActed={localPlayer.hasActedThisRound}
              />
           ) : (
-             <div className="flex justify-center items-end h-48 space-x-2 md:space-x-4 mb-6">
+             <div className="flex justify-center items-end h-32 sm:h-48 space-x-1.5 sm:space-x-4 mb-4 sm:mb-6">
                {localCards.map((card, idx) => (
                  <PlayingCard key={idx} card={card} size="lg" />
                ))}
@@ -317,7 +317,7 @@ export default function TablePage() {
              </div>
           )
         ) : (
-          <div className="h-48 flex items-center justify-center text-gray-500 font-title italic mb-6">
+          <div className="h-32 sm:h-48 flex items-center justify-center text-gray-500 font-title italic mb-4 sm:mb-6">
             Vous avez passé ce tour
           </div>
         )}

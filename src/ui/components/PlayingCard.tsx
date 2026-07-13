@@ -20,15 +20,15 @@ export function PlayingCard({ card, selected, onClick, className, size = 'md' }:
   const isRed = card ? isRedSuit(card.suit) : false;
 
   const sizeClasses = {
-    sm: 'w-12 h-16 text-xs',
-    md: 'w-16 h-24 text-base',
-    lg: 'w-24 h-36 text-xl',
+    sm: 'w-9 h-13 sm:w-12 sm:h-16 text-[10px] sm:text-xs',
+    md: 'w-12 h-18 sm:w-16 sm:h-24 text-xs sm:text-base',
+    lg: 'w-16 h-24 sm:w-24 sm:h-36 text-sm sm:text-xl',
   };
 
   const symbolSizeClasses = {
-    sm: 'text-lg',
-    md: 'text-3xl',
-    lg: 'text-5xl',
+    sm: 'text-sm sm:text-lg',
+    md: 'text-xl sm:text-3xl',
+    lg: 'text-3xl sm:text-5xl',
   };
 
   return (
