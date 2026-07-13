@@ -119,17 +119,17 @@ describe('a full hand runs through all 8 fixed stages in order', () => {
 });
 
 describe('the 3-point clothing restoration rule', () => {
-  it('lets a player at 3+ points put back one clothing item and resets their points to 0', () => {
+  it('lets a player at 3+ points put back one clothing item and subtracts 3 points', () => {
     let table = makeTable(2);
     const player = table.players.find((p) => p.id === 'p0')!;
-    player.points = 3;
+    player.points = 4;
     player.clothingRemaining = 4;
 
     table = restoreClothing(table, 'p0');
 
     const updated = table.players.find((p) => p.id === 'p0')!;
     expect(updated.clothingRemaining).toBe(5);
-    expect(updated.points).toBe(0);
+    expect(updated.points).toBe(1);
   });
 
   it('does nothing if the player has fewer than 3 points', () => {

@@ -237,7 +237,7 @@ export function restoreClothing(table: TableState, playerId: string): TableState
   const next = cloneTable(table);
   const nextPlayer = next.players.find((p) => p.id === playerId) as Player;
   nextPlayer.clothingRemaining += 1;
-  nextPlayer.points = 0;
+  nextPlayer.points -= 3;
   return next;
 }
 

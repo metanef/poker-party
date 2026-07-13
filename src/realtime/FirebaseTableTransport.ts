@@ -275,10 +275,6 @@ export class FirebaseTableTransport implements ITableTransport {
     if (!this.hostTable) return;
     this.hostTable = resolveShowdown(this.hostTable);
     void this.hostPublish(this.hostTable);
-
-    if (canStartNewHand(this.hostTable)) {
-      this.scheduleHost(() => this.hostStartNextHand(), NEXT_HAND_DELAY_MS);
-    }
   }
 
   private hostStartNextHand(): void {
@@ -391,6 +387,17 @@ export class FirebaseTableTransport implements ITableTransport {
           ? pauseTable(this.hostTable)
           : resumeTable(this.hostTable);
         void this.hostPublish(this.hostTable);
+        break;
+      }
+      case 'startNextHand': {
+        if (this.hostTable && this.hostTable.stage === 'showdown' && canStartNewHand(this.hostTable)) {
+          if (uid === this.hostTable.hostId) {
+            this.hostDeck = Deck.shuffled();
+            this.hostTable = startHand(this.hostTable, this.hostDeck);
+            void this.hostPublish(this.hostTable);
+            this.scheduleHost(() => this.hostRunExchangeRound(1), REVEAL_PAUSE_MS);
+          }
+        }
         break;
       }
       default:
@@ -685,6 +692,18 @@ export class FirebaseTableTransport implements ITableTransport {
       return;
     }
     await this.sendIntent({ type: 'exchangeChoice', choice });
+  }
+
+  async startNextHand(): Promise<void> {
+    if (this.isHostClient && this.hostTable) {
+      if (!canStartNewHand(this.hostTable)) return;
+      this.hostDeck = Deck.shuffled();
+      this.hostTable = startHand(this.hostTable, this.hostDeck);
+      await this.hostPublish(this.hostTable);
+      this.scheduleHost(() => this.hostRunExchangeRound(1), REVEAL_PAUSE_MS);
+      return;
+    }
+    await this.sendIntent({ type: 'startNextHand' });
   }
 
   async sendRestoreClothing(): Promise<void> {

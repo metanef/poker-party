@@ -256,13 +256,9 @@ export class LocalTableTransport implements ITableTransport {
     this.table = resolveShowdown(this.table);
     this.notifyTable();
     this.notifyPrivateHand();
-
-    if (canStartNewHand(this.table)) {
-      this.schedule(() => this.startNextHand(), NEXT_HAND_DELAY_MS);
-    }
   }
 
-  private startNextHand() {
+  async startNextHand(): Promise<void> {
     if (!this.table || !canStartNewHand(this.table)) return;
     this.deck = Deck.shuffled();
     this.table = startHand(this.table, this.deck);

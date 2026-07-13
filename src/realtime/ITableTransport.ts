@@ -66,6 +66,9 @@ export interface ITableTransport {
   /** Host-only: starts the game once >= 2 players are present and consenting. */
   startGame(): Promise<void>;
 
+  /** Host-only: starts the next hand/round after a showdown. */
+  startNextHand(): Promise<void>;
+
   /** Sends this player's exchange decision as an intent -- never computed locally. */
   sendExchangeChoice(choice: ExchangeChoice): Promise<void>;
 

@@ -240,6 +240,12 @@ export default function TablePage() {
               result={table.lastHandResult} 
               players={table.players} 
               localPlayerId={transport.localPlayerId} 
+              isHost={table.hostId === transport.localPlayerId}
+              onNextHand={() => transport.startNextHand().catch(console.error)}
+              localPlayerPoints={localPlayer.points}
+              localPlayerClothingRemaining={localPlayer.clothingRemaining}
+              startingClothing={table.startingClothing}
+              onRestoreClothing={() => transport.sendRestoreClothing().catch(console.error)}
             />
           </div>
         )}
