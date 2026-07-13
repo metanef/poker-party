@@ -8,14 +8,13 @@
     },
     "tables": {
       "$code": {
+        ".write": "auth != null && (newData.child('public').child('hostId').val() === auth.uid || (data.child('public').exists() && data.child('public').child('hostId').val() === auth.uid))",
         "public": {
-          ".read": "auth != null",
-          ".write": "auth != null && (newData.child('hostId').val() === auth.uid || (data.exists() && data.child('hostId').val() === auth.uid))"
+          ".read": "auth != null"
         },
         "private": {
           "$uid": {
-            ".read": "auth != null && auth.uid === $uid",
-            ".write": "auth != null && (root.child('tables').child($code).child('public').child('hostId').val() === auth.uid || (newData.child('holeCards').exists() && !root.child('tables').child($code).child('public').exists()))"
+            ".read": "auth != null && auth.uid === $uid"
           }
         },
         "intents": {
