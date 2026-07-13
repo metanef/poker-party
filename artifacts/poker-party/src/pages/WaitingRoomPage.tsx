@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Player } from '@/engine/model/Player';
 import { getTransport } from '@/ui/hooks/useTableSocket';
 import { PlayerSeat } from '@/ui/components/PlayerSeat';
-import { Copy, Check, Play, LogOut, Info } from 'lucide-react';
+import { Copy, Check, Play, LogOut, Info, Trash2 } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 interface WaitingRoomPageProps {
@@ -160,13 +160,30 @@ export default function WaitingRoomPage({ code, players, hostId, localPlayerId, 
             ))}
           </div>
           
-          <button 
-            onClick={leaveTable}
-            className="mt-6 mx-auto flex items-center gap-2 text-sm text-gray-500 hover:text-red-400 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Quitter la table
-          </button>
+          <div className="mt-6 flex flex-col items-center gap-3">
+            {isHost && (
+              <button
+                onClick={() => {
+                  if (window.confirm("Supprimer definitivement cette table ? Les autres joueurs seront deconnectes.")) {
+                    getTransport().deleteTable().then(() => {
+                      setLocation('/');
+                    }).catch(console.error);
+                  }
+                }}
+                className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-400 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Supprimer la table
+              </button>
+            )}
+            <button
+              onClick={leaveTable}
+              className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-400 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Quitter la table
+            </button>
+          </div>
         </div>
 
       </div>

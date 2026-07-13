@@ -139,6 +139,17 @@ export class LocalTableTransport implements ITableTransport {
     this.notifyPrivateHand();
   }
 
+  async deleteTable(): Promise<void> {
+    if (!this.table || this.table.hostId !== this.localPlayerId) {
+      throw new Error("Seul l'hote peut supprimer la table.");
+    }
+    this.clearTimers();
+    this.table = null;
+    this.deck = null;
+    this.notifyTable();
+    this.notifyPrivateHand();
+  }
+
   async sendConsent(): Promise<void> {
     if (!this.table) return;
     const me = this.table.players.find((p) => p.id === this.localPlayerId);

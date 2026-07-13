@@ -600,6 +600,30 @@ export class FirebaseTableTransport implements ITableTransport {
     this.privateHandListeners.forEach((l) => l(null));
   }
 
+  async deleteTable(): Promise<void> {
+    if (!this.currentTableCode) {
+      throw new Error("Vous n'etes connecte a aucune table.");
+    }
+    if (!this.isHostClient) {
+      throw new Error("Seul l'hote peut supprimer la table.");
+    }
+    const code = this.currentTableCode;
+    const db = this.db();
+
+    await remove(ref(db, `tables/${code}`));
+    await remove(ref(db, `lobby/${code}`));
+
+    this.clearHostTimers();
+    this.stopAllListeners();
+    this.currentTableCode = null;
+    this.isHostClient = false;
+    this.hostTable = null;
+    this.hostDeck = null;
+    this.processedIntents.clear();
+    this.tableListeners.forEach((l) => l(null));
+    this.privateHandListeners.forEach((l) => l(null));
+  }
+
   async sendConsent(): Promise<void> {
     if (this.isHostClient && this.hostTable) {
       const player = this.hostTable.players.find(

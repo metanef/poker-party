@@ -54,6 +54,9 @@ export interface ITableTransport {
   /** Leaves the current table. */
   leaveTable(): Promise<void>;
 
+  /** Host-only: permanently deletes the current table and its lobby entry. */
+  deleteTable(): Promise<void>;
+
   /** Records this player's explicit consent for the current table. */
   sendConsent(): Promise<void>;
 
