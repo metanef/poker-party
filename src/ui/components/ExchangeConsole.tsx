@@ -63,40 +63,48 @@ export function ExchangeConsole({ cards, isExchangeActive, hasActed, className =
       </div>
 
       {/* Action Area */}
-      <div className="h-16 flex items-center justify-center w-full">
-        {isExchangeActive && !hasActed ? (
-          <div className="flex gap-4 w-full px-4 justify-center">
-            {/* Changer les cartes button */}
-            <button
-              onClick={handleExchange}
-              disabled={selectedIndices.size === 0}
-              className={`font-title font-semibold py-3 px-6 rounded-full transition-all shadow-lg flex-1 max-w-[240px] ${
-                selectedIndices.size > 0
-                  ? 'bg-felt-accent text-table-bg hover:brightness-110 active:scale-95 cursor-pointer'
-                  : 'bg-table-panel/50 text-gray-500 border border-table-border/40 cursor-not-allowed opacity-50'
-              }`}
-            >
-              Changer {selectedIndices.size > 0 ? selectedIndices.size : ''} carte{selectedIndices.size > 1 ? 's' : ''}
-            </button>
+      <div className="flex flex-col items-center gap-2 w-full mt-4">
+        <div className="flex gap-4 w-full px-4 justify-center">
+          {/* Changer les cartes button */}
+          <button
+            onClick={handleExchange}
+            disabled={!isExchangeActive || hasActed || selectedIndices.size === 0}
+            className={`font-title font-semibold py-3 px-6 rounded-full transition-all shadow-lg flex-1 max-w-[240px] ${
+              isExchangeActive && !hasActed && selectedIndices.size > 0
+                ? 'bg-felt-accent text-table-bg hover:brightness-110 active:scale-95 cursor-pointer'
+                : 'bg-table-panel/50 text-gray-500 border border-table-border/40 cursor-not-allowed opacity-50'
+            }`}
+          >
+            Changer {selectedIndices.size > 0 ? selectedIndices.size : ''} carte{selectedIndices.size > 1 ? 's' : ''}
+          </button>
 
-            {/* Garder tout button */}
-            <button
-              onClick={handleKeepAll}
-              disabled={selectedIndices.size > 0}
-              className={`font-title font-semibold py-3 px-6 rounded-full transition-all shadow-lg flex-1 max-w-[240px] ${
-                selectedIndices.size === 0
-                  ? 'bg-table-panel text-white border border-table-border hover:bg-white/5 active:scale-95 cursor-pointer'
-                  : 'bg-table-panel/50 text-gray-500 border border-table-border/40 cursor-not-allowed opacity-50'
-              }`}
-            >
-              Garder tout
-            </button>
-          </div>
-        ) : hasActed ? (
-          <div className="text-gray-400 font-medium italic animate-pulse">
-            En attente des autres joueurs...
-          </div>
-        ) : null}
+          {/* Garder tout button */}
+          <button
+            onClick={handleKeepAll}
+            disabled={!isExchangeActive || hasActed || selectedIndices.size > 0}
+            className={`font-title font-semibold py-3 px-6 rounded-full transition-all shadow-lg flex-1 max-w-[240px] ${
+              isExchangeActive && !hasActed && selectedIndices.size === 0
+                ? 'bg-table-panel text-white border border-table-border hover:bg-white/5 active:scale-95 cursor-pointer'
+                : 'bg-table-panel/50 text-gray-500 border border-table-border/40 cursor-not-allowed opacity-50'
+            }`}
+          >
+            Garder tout
+          </button>
+        </div>
+
+        {/* Status Message */}
+        <div className="h-6 flex items-center justify-center">
+          {hasActed && (
+            <div className="text-xs text-gray-400 font-medium italic animate-pulse">
+              En attente des autres joueurs...
+            </div>
+          )}
+          {!isExchangeActive && !hasActed && (
+            <div className="text-xs text-felt-accent font-medium italic animate-pulse">
+              Chargement de la manche...
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
