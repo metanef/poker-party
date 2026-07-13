@@ -130,7 +130,7 @@ Désormais, à chaque fois que vous ferez un `git push` sur la branche `main`, l
 
 Voici une liste d'améliorations prévues ou recommandées pour enrichir l'expérience utilisateur et la robustesse de l'application :
 
-- [ ] **Optimisation Responsivité Mobile complète** : Ajuster la disposition de la table de jeu (notamment les sièges des adversaires et le plateau central) sur les petits écrans en mode portrait.
+- [x] **Optimisation Responsivité Mobile complète** : Ajuster la disposition de la table de jeu (notamment les sièges des adversaires et le plateau central) sur les petits écrans en mode portrait.
 - [ ] **Historique des mains & Chat textuel** : Ajouter un panneau latéral pour lire le déroulement des actions passées (ex. *"Joueur 1 a changé 2 cartes"*, *"Joueur 2 a remporté la main avec un Brelan"*) et discuter en direct.
 - [ ] **Retour Haptique & Effets Sonores** : Ajouter des bruitages subtils lors de la donne des cartes, du minuteur de tour et des émotes, avec vibration sur smartphone pour renforcer l'immersion.
 - [ ] **Statistiques Joueurs** : Suivi des scores globaux et taux de victoires par session de jeu.
