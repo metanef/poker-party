@@ -18,14 +18,14 @@
           }
         },
         "intents": {
+          ".read": "auth != null && root.child('tables').child($code).child('public').child('hostId').val() === auth.uid",
           "$uid": {
-            ".read": "auth != null && root.child('tables').child($code).child('public').child('hostId').val() === auth.uid",
             ".write": "auth != null && auth.uid === $uid"
           }
         },
         "emotes": {
+          ".read": "auth != null",
           "$uid": {
-            ".read": "auth != null",
             ".write": "auth != null && auth.uid === $uid"
           }
         }
