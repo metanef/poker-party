@@ -96,7 +96,7 @@ export function PlayerSeat({ player, isLocal, isActiveTurn, isWaiting, className
               {player.points} pt{player.points > 1 ? 's' : ''}
             </span>
             <span className="text-[8px] sm:text-[10px] text-gray-400 bg-white/5 px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
-              {player.clothingRemaining} 👕 restant{player.clothingRemaining > 1 ? 's' : ''}
+              👕 {player.clothingRemaining} restant{player.clothingRemaining > 1 ? 's' : ''}
             </span>
           </div>
         )}

@@ -300,22 +300,11 @@ export default function TablePage() {
 
         {/* Exchange Console or Static Cards */}
         {localPlayer.active ? (
-          isExchange && !isShowdown ? (
-             <ExchangeConsole 
-               cards={localCards} 
-               isExchangeActive={isExchange && !table.paused}
-               hasActed={localPlayer.hasActedThisRound}
-             />
-          ) : (
-             <div className="flex justify-center items-end h-32 sm:h-48 space-x-1.5 sm:space-x-4 mb-4 sm:mb-6">
-               {localCards.map((card, idx) => (
-                 <PlayingCard key={idx} card={card} size="lg" />
-               ))}
-               {localCards.length === 0 && Array.from({length: 5}).map((_, i) => (
-                  <PlayingCard key={i} size="lg" className="opacity-50" />
-               ))}
-             </div>
-          )
+           <ExchangeConsole 
+             cards={localCards} 
+             isExchangeActive={isExchange && !table.paused && !isShowdown}
+             hasActed={localPlayer.hasActedThisRound}
+           />
         ) : (
           <div className="h-32 sm:h-48 flex items-center justify-center text-gray-500 font-title italic mb-4 sm:mb-6">
             Vous avez passé ce tour
