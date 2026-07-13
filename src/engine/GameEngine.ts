@@ -66,7 +66,7 @@ export function beginExchangeRound(
   timeoutMs = EXCHANGE_TIMEOUT_MS,
 ): TableState {
   const next = cloneTable(table);
-  const stage: HandStage = round === 1 ? 'exchange1' : round === 2 ? 'exchange2' : 'exchange3';
+  const stage: HandStage = round === 1 ? 'echange1' : round === 2 ? 'echange2' : 'echange3';
   next.stage = stage;
   next.exchangeRound = round;
   next.exchangeDeadline = now + timeoutMs;
@@ -143,13 +143,13 @@ export function finalizeExchangeRound(table: TableState): TableState {
 /** Reveals the turn (stage 4) or river (stage 6) card, advancing past an exchange round. */
 export function advancePastExchange(table: TableState, deck: Deck): TableState {
   const next = cloneTable(table);
-  if (table.stage === 'exchange1') {
+  if (table.stage === 'echange1') {
     next.communityCards.push(...deck.draw(1));
     next.stage = 'turn';
-  } else if (table.stage === 'exchange2') {
+  } else if (table.stage === 'echange2') {
     next.communityCards.push(...deck.draw(1));
     next.stage = 'river';
-  } else if (table.stage === 'exchange3') {
+  } else if (table.stage === 'echange3') {
     next.stage = 'showdown';
   }
   next.deckSize = deck.remaining;

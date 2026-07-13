@@ -134,6 +134,5 @@ Voici une liste d'améliorations prévues ou recommandées pour enrichir l'expé
 - [ ] **Historique des mains & Chat textuel** : Ajouter un panneau latéral pour lire le déroulement des actions passées (ex. *"Joueur 1 a changé 2 cartes"*, *"Joueur 2 a remporté la main avec un Brelan"*) et discuter en direct.
 - [ ] **Retour Haptique & Effets Sonores** : Ajouter des bruitages subtils lors de la donne des cartes, du minuteur de tour et des émotes, avec vibration sur smartphone pour renforcer l'immersion.
 - [ ] **Statistiques Joueurs** : Suivi des scores globaux et taux de victoires par session de jeu.
-- [ ] **Cartes personnalisées** : Choix du dos des cartes et du thème du tapis de jeu (ex: neon, retro pixel, tapis rouge de prestige).
 - [ ] **Gestion avancée des Déconnexions** : Faciliter la reconnexion automatique en cours de manche sans bloquer la FSM (Machine à États) et attribuer le statut de bot temporaire en cas d'absence.
 

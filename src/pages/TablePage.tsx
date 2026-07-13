@@ -172,7 +172,7 @@ export default function TablePage() {
   }
 
   // 6. Active Game View
-  const isExchange = ['exchange1', 'exchange2', 'exchange3'].includes(table.stage);
+  const isExchange = ['echange1', 'echange2', 'echange3'].includes(table.stage);
   const isShowdown = table.stage === 'showdown';
   const opponents = table.players.filter(p => p.id !== transport.localPlayerId);
   const localCards = privateHand?.holeCards || [];

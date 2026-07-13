@@ -5,11 +5,11 @@
 export const HAND_STAGES = [
   'dealing',
   'flop',
-  'exchange1',
+  'echange1',
   'turn',
-  'exchange2',
+  'echange2',
   'river',
-  'exchange3',
+  'echange3',
   'showdown',
 ] as const;
 
@@ -18,9 +18,9 @@ export type HandStage = (typeof HAND_STAGES)[number];
 export type Stage = 'lobby' | HandStage;
 
 export const EXCHANGE_STAGES: HandStage[] = [
-  'exchange1',
-  'exchange2',
-  'exchange3',
+  'echange1',
+  'echange2',
+  'echange3',
 ];
 
 export function isExchangeStage(stage: Stage): boolean {

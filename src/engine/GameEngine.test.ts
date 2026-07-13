@@ -48,7 +48,7 @@ describe('a full hand runs through all 8 fixed stages in order', () => {
 
     // Stage 3: 1st exchange round -- everyone keeps.
     table = beginExchangeRound(table, 1, Date.now());
-    expect(table.stage).toBe('exchange1');
+    expect(table.stage).toBe('echange1');
     for (const p of table.players) {
       const result = applyExchangeChoice(table, p.id, { type: 'keep' }, deck);
       expect(result.valid).toBe(true);
@@ -63,7 +63,7 @@ describe('a full hand runs through all 8 fixed stages in order', () => {
 
     // Stage 5: 2nd exchange round.
     table = beginExchangeRound(table, 2, Date.now());
-    expect(table.stage).toBe('exchange2');
+    expect(table.stage).toBe('echange2');
     table = finalizeExchangeRound(table); // nobody responds -> all "keep"
 
     // Stage 6: river.
@@ -73,7 +73,7 @@ describe('a full hand runs through all 8 fixed stages in order', () => {
 
     // Stage 7: 3rd exchange round.
     table = beginExchangeRound(table, 3, Date.now());
-    expect(table.stage).toBe('exchange3');
+    expect(table.stage).toBe('echange3');
     table = finalizeExchangeRound(table);
 
     // Stage 8: showdown.
