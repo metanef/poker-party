@@ -204,13 +204,13 @@ export default function TablePage() {
       </div>
 
       {/* Main Game Area */}
-      <div className="flex-1 relative flex flex-col items-center justify-center p-4">
+      <div className="flex-1 relative flex flex-col items-center justify-between p-4">
         
         {/* Felt / Table Center */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] h-[35vh] sm:w-[80vw] sm:h-[60vh] max-w-4xl border-2 border-white/5 rounded-full bg-white/[0.02] shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] pointer-events-none" />
 
         {/* Opponents Layout (Top half circle) */}
-        <div className="w-full max-w-3xl flex justify-around items-end absolute top-6 sm:top-12 px-2 sm:px-0 z-10">
+        <div className="w-full max-w-3xl flex justify-around items-end mt-2 sm:mt-6 px-2 sm:px-0 z-10">
           {opponents.map((p) => (
             <PlayerSeat 
               key={p.id} 
@@ -221,7 +221,7 @@ export default function TablePage() {
         </div>
 
         {/* Center Table Area (Community Cards & Pot/Timer) */}
-        <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-8 mt-6 sm:mt-12 scale-90 sm:scale-100">
+        <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-8 my-auto scale-90 sm:scale-100">
           {/* Community Cards */}
           <div className="flex items-center gap-1.5 sm:gap-2 h-28 sm:h-36">
             {table.communityCards.map((card, i) => (
