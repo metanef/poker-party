@@ -1,2 +1,0 @@
-- [Vite config overrides for GitHub Actions](vite-multi-config-artifacts.md) — an artifact's `vite.config.ts` may be Replit-dev-only (reads PORT/BASE_PATH); add a separate config + package.json script for external CI builds instead of passing extra `--config` flags to an existing script.
-- [Host-authoritative Firebase RTDB transport pattern](host-authoritative-firebase-transport.md) — client-side host computes game state, public/private/intents node split, security rules keyed by hostId/uid.
