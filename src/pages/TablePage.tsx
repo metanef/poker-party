@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { useTableStore } from '@/store/tableStore';
 import { getTransport } from '@/ui/hooks/useTableSocket';
@@ -27,7 +27,7 @@ export default function TablePage() {
   const [avatar, setAvatar] = useState('👻');
   const [isJoining, setIsJoining] = useState(false);
 
-  const [announcementHand, setAnnouncementHand] = useState<number | null>(null);
+  const lastAnnouncedHand = useRef<number | null>(null);
   const [showRoundAnnounce, setShowRoundAnnounce] = useState(false);
 
   // Check if we need to show the join form
@@ -46,8 +46,8 @@ export default function TablePage() {
   // Round start announcement effect
   useEffect(() => {
     if (table && table.stage !== 'lobby' && table.handNumber > 0) {
-      if (announcementHand !== table.handNumber) {
-        setAnnouncementHand(table.handNumber);
+      if (lastAnnouncedHand.current !== table.handNumber) {
+        lastAnnouncedHand.current = table.handNumber;
         setShowRoundAnnounce(true);
         const timer = setTimeout(() => {
           setShowRoundAnnounce(false);
@@ -55,7 +55,7 @@ export default function TablePage() {
         return () => clearTimeout(timer);
       }
     }
-  }, [table?.handNumber, announcementHand]);
+  }, [table?.handNumber]);
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
