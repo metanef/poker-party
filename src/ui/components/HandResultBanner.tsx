@@ -78,18 +78,39 @@ export function HandResultBanner({
 
       <div className="w-full h-px bg-table-border" />
 
-      {/* Actions Section */}
-      <div className="w-full flex flex-col gap-3">
-        {canBuyback && (
+      {/* Marché de rachat Section */}
+      <div className="w-full bg-black/20 border border-white/5 rounded-xl p-3 flex flex-col items-center gap-2">
+        <h4 className="text-xs font-bold text-amber-400 uppercase tracking-widest flex items-center gap-1">
+          🛍️ Marché de rachat
+        </h4>
+        <p className="text-[10px] text-gray-400">
+          Échangez 3 points de victoire pour récupérer 1 vêtement perdu.
+        </p>
+        
+        {localPlayerClothingRemaining >= startingClothing ? (
+          <div className="text-[10px] text-gray-500 italic py-1">
+            Garde-robe déjà complète (max)
+          </div>
+        ) : localPlayerPoints < 3 ? (
+          <button
+            disabled
+            className="w-full bg-white/5 text-gray-400 border border-white/10 font-title text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1 cursor-not-allowed"
+          >
+            Points insuffisants ({localPlayerPoints}/3 pts)
+          </button>
+        ) : (
           <button
             onClick={onRestoreClothing}
-            className="w-full bg-amber-500 hover:bg-amber-400 text-table-bg font-title font-bold py-2.5 px-4 rounded-xl transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 hover:shadow-amber-500/25"
+            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-table-bg font-title font-bold text-xs py-2 px-3 rounded-lg transition-all active:scale-95 shadow-md flex items-center justify-center gap-1.5 hover:shadow-amber-500/10"
           >
-            <RefreshCw className="w-4 h-4 animate-spin-slow" />
-            Racheter un vêtement (-3 pts)
+            <RefreshCw className="w-3.5 h-3.5" />
+            Racheter 1 vêtement (-3 pts)
           </button>
         )}
+      </div>
 
+      {/* Actions Section */}
+      <div className="w-full flex flex-col gap-3">
         {isHost ? (
           <button
             onClick={onNextHand}

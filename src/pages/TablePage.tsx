@@ -265,7 +265,7 @@ export default function TablePage() {
            <div className="text-right flex flex-col items-end gap-1">
              <span className="text-white font-medium text-sm">{localPlayer.pseudo}</span>
              <span className="text-rank-gold font-bold text-lg">{localPlayer.points} pts</span>
-             <span className="text-xs text-gray-400">{localPlayer.clothingRemaining} restants</span>
+             <span className="text-xs text-gray-400">👕 {localPlayer.clothingRemaining} restant{localPlayer.clothingRemaining > 1 ? 's' : ''}</span>
              {localPlayer.points >= 3 && (
                <button
                  onClick={() => transport.sendRestoreClothing().catch(console.error)}
