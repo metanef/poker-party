@@ -154,6 +154,10 @@ export class FirebaseTableTransport implements ITableTransport {
     return ref(this.db(), `tables/${code}/emotes/${uid}`);
   }
 
+  private lobbyRef(code: string): DatabaseReference {
+    return ref(this.db(), `lobby/${code}`);
+  }
+
   // ---------------------------------------------------------------------------
   // Sérialisation / désérialisation de TableState
   // ---------------------------------------------------------------------------
@@ -188,6 +192,22 @@ export class FirebaseTableTransport implements ITableTransport {
     for (const player of table.players) {
       updates[`tables/${code}/private/${player.id}`] =
         this.serializePrivateHand(table, player.id);
+    }
+
+    // Index leger, lisible par tous les clients authentifies, utilise pour
+    // afficher les "tables en attente" sans avoir a lire tout /tables (dont
+    // les cartes privees d'autres joueurs sont protegees par des regles
+    // dediees). On ne garde une entree que pendant le lobby.
+    if (table.stage === 'lobby') {
+      updates[`lobby/${code}`] = {
+        code: table.code,
+        hostId: table.hostId,
+        playersConnected: table.players.length,
+        playersExpected: table.maxPlayers,
+        stage: table.stage,
+      };
+    } else {
+      updates[`lobby/${code}`] = null;
     }
 
     await update(ref(db), updates);
@@ -708,23 +728,19 @@ export class FirebaseTableTransport implements ITableTransport {
   async listOpenTables(): Promise<TableSummary[]> {
     await this.ensureAuth();
     const db = this.db();
-    const tablesRef = ref(db, 'tables');
-    const snap = await get(tablesRef);
+    const lobbyRef = ref(db, 'lobby');
+    const snap = await get(lobbyRef);
     if (!snap.exists()) return [];
 
     const results: TableSummary[] = [];
-    snap.forEach((tableSnap) => {
-      const publicData = tableSnap.child('public').val() as TableState | null;
-      if (!publicData) return;
-      if (publicData.stage !== 'lobby') return;
-      const playerCount = Array.isArray(publicData.players)
-        ? publicData.players.length
-        : Object.keys((publicData.players as Record<string, unknown>) ?? {}).length;
+    snap.forEach((entrySnap) => {
+      const entry = entrySnap.val() as TableSummary | null;
+      if (!entry || entry.stage !== 'lobby') return;
       results.push({
-        code: publicData.code,
-        playersConnected: playerCount,
-        playersExpected: publicData.maxPlayers,
-        stage: publicData.stage,
+        code: entry.code,
+        playersConnected: entry.playersConnected,
+        playersExpected: entry.playersExpected,
+        stage: entry.stage,
       });
     });
 
