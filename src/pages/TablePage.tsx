@@ -55,7 +55,7 @@ export default function TablePage() {
         return () => clearTimeout(timer);
       }
     }
-  }, [table?.handNumber, table?.stage, announcementHand]);
+  }, [table?.handNumber, announcementHand]);
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
