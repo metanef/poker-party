@@ -47,7 +47,7 @@ export function PlayerSeat({ player, isLocal, isActiveTurn, isWaiting, className
       {/* Cards - Only show backs for other players if not showdown, local player cards are handled in ExchangeConsole / TableView */}
       {!isLocal && player.active && !isWaiting && (
         <div className="flex -space-x-4 mb-3 scale-75 origin-bottom opacity-90">
-           {player.holeCards.length > 0 ? (
+           {player.holeCards && player.holeCards.length > 0 ? (
              player.holeCards.map((c, i) => (
                <PlayingCard key={i} card={c} size="sm" className="shadow-lg" />
              ))

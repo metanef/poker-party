@@ -44,7 +44,7 @@ export function validateExchangeChoice(
     };
   }
   for (const idx of cardIndices) {
-    if (idx < 0 || idx >= player.holeCards.length) {
+    if (idx < 0 || idx >= (player.holeCards?.length ?? 0)) {
       return { valid: false, error: 'Index de carte invalide.' };
     }
   }
