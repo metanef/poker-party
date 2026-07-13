@@ -66,21 +66,31 @@ export function ExchangeConsole({ cards, isExchangeActive, hasActed, className =
       <div className="h-16 flex items-center justify-center w-full">
         {isExchangeActive && !hasActed ? (
           <div className="flex gap-4 w-full px-4 justify-center">
-            {selectedIndices.size > 0 ? (
-              <button
-                onClick={handleExchange}
-                className="bg-felt-accent text-table-bg font-title font-semibold py-3 px-6 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg flex-1 max-w-[240px]"
-              >
-                Changer {selectedIndices.size} carte{selectedIndices.size > 1 ? 's' : ''}
-              </button>
-            ) : (
-              <button
-                onClick={handleKeepAll}
-                className="bg-table-panel text-white border border-table-border font-title font-semibold py-3 px-6 rounded-full hover:bg-white/5 active:scale-95 transition-all shadow-lg flex-1 max-w-[240px]"
-              >
-                Garder tout
-              </button>
-            )}
+            {/* Changer les cartes button */}
+            <button
+              onClick={handleExchange}
+              disabled={selectedIndices.size === 0}
+              className={`font-title font-semibold py-3 px-6 rounded-full transition-all shadow-lg flex-1 max-w-[240px] ${
+                selectedIndices.size > 0
+                  ? 'bg-felt-accent text-table-bg hover:brightness-110 active:scale-95 cursor-pointer'
+                  : 'bg-table-panel/50 text-gray-500 border border-table-border/40 cursor-not-allowed opacity-50'
+              }`}
+            >
+              Changer {selectedIndices.size > 0 ? selectedIndices.size : ''} carte{selectedIndices.size > 1 ? 's' : ''}
+            </button>
+
+            {/* Garder tout button */}
+            <button
+              onClick={handleKeepAll}
+              disabled={selectedIndices.size > 0}
+              className={`font-title font-semibold py-3 px-6 rounded-full transition-all shadow-lg flex-1 max-w-[240px] ${
+                selectedIndices.size === 0
+                  ? 'bg-table-panel text-white border border-table-border hover:bg-white/5 active:scale-95 cursor-pointer'
+                  : 'bg-table-panel/50 text-gray-500 border border-table-border/40 cursor-not-allowed opacity-50'
+              }`}
+            >
+              Garder tout
+            </button>
           </div>
         ) : hasActed ? (
           <div className="text-gray-400 font-medium italic animate-pulse">
