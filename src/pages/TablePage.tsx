@@ -27,6 +27,9 @@ export default function TablePage() {
   const [avatar, setAvatar] = useState('👻');
   const [isJoining, setIsJoining] = useState(false);
 
+  const [announcementHand, setAnnouncementHand] = useState<number | null>(null);
+  const [showRoundAnnounce, setShowRoundAnnounce] = useState(false);
+
   // Check if we need to show the join form
   useEffect(() => {
     // Give it a tiny delay to see if transport connects and gets state
@@ -39,6 +42,20 @@ export default function TablePage() {
     }, 500);
     return () => clearTimeout(timer);
   }, [table, transport.localPlayerId]);
+
+  // Round start announcement effect
+  useEffect(() => {
+    if (table && table.stage !== 'lobby' && table.handNumber > 0) {
+      if (announcementHand !== table.handNumber) {
+        setAnnouncementHand(table.handNumber);
+        setShowRoundAnnounce(true);
+        const timer = setTimeout(() => {
+          setShowRoundAnnounce(false);
+        }, 2200);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [table?.handNumber, table?.stage, announcementHand]);
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -318,6 +335,20 @@ export default function TablePage() {
                  : "En attente de l'hôte pour reprendre la partie."}
              </p>
            </div>
+        </div>
+      )}
+
+      {/* Round Announcement Overlay */}
+      {showRoundAnnounce && table && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 pointer-events-none animate-backdrop">
+          <div className="bg-gradient-to-r from-felt-accent/10 via-black/85 to-felt-accent/10 border-y border-felt-accent/20 w-full py-8 text-center shadow-2xl backdrop-blur-md transform animate-banner">
+            <span className="text-felt-accent font-mono tracking-widest text-xs uppercase block mb-1">
+              🃏 Distribution des cartes en cours
+            </span>
+            <h2 className="font-title text-3xl md:text-5xl font-black text-white tracking-wide uppercase drop-shadow-[0_2px_10px_rgba(61,217,196,0.3)]">
+              Début de la Manche {table.handNumber}
+            </h2>
+          </div>
         </div>
       )}
 
