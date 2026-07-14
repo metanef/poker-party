@@ -135,4 +135,8 @@ Voici une liste d'améliorations prévues ou recommandées pour enrichir l'expé
 - [ ] **Retour Haptique & Effets Sonores** : Ajouter des bruitages subtils lors de la donne des cartes, du minuteur de tour et des émotes, avec vibration sur smartphone pour renforcer l'immersion.
 - [ ] **Statistiques Joueurs** : Suivi des scores globaux et taux de victoires par session de jeu.
 - [ ] **Gestion avancée des Déconnexions** : Faciliter la reconnexion automatique en cours de manche sans bloquer la FSM (Machine à États) et attribuer le statut de bot temporaire en cas d'absence.
+- [ ] **Responsivité iPhone** : Optimiser l'affichage et l'adaptation de l'interface pour les iPhones.
+- [ ] **Optimisation des réactions / émotes** : Réduire le nombre de réactions et les faire apparaître uniquement de manière temporaire lorsqu'elles sont envoyées.
+- [ ] **Cartes de l'adversaire plus grandes** : Afficher les cartes de l'adversaire en plus gros lors de la révélation à la fin de la manche.
+- [ ] **Main adverse sur l'écran de fin** : Afficher la main de l'adversaire en plus de la nôtre sur l'écran de victoire ou de défaite.
 
