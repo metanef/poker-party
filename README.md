@@ -1,6 +1,8 @@
-# Poker Party 🃏
+# Poker Party 🃏 (v1.0 - Version Finale)
 
 🔗 **Jouer en ligne** : [https://metanef.github.io/poker-party/](https://metanef.github.io/poker-party/)
+
+🎉 **Version 1.0 Officielle** : Le gameplay complet, la responsivité iOS/iPhone, la personnalisation du lobby, le chat avec notifications intelligentes, l'écran de fin clair et l'animation de vêtement qui brûle sont intégralement finalisés et prêts à être joués !
 
 **Poker Party** est une application web moderne et responsive de jeu de cartes inspiré du Poker avec un enjeu de déshabillage symbolique. Jouable en temps réel entre amis via **Firebase** ou en mode **Solo contre des bots**.
 
