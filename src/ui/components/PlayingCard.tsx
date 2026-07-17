@@ -37,7 +37,7 @@ export function PlayingCard({ card, selected, onClick, className, size = 'md' }:
       className={cn(
         'relative rounded-card overflow-hidden shadow-md transition-all duration-200 select-none cursor-pointer',
         sizeClasses[size],
-        selected ? 'ring-2 ring-felt-accent -translate-y-2 shadow-lg shadow-felt-accent/20' : '',
+        selected ? 'ring-2 ring-felt-accent -translate-y-2 shadow-lg shadow-felt-accent/20 z-10' : '',
         !onClick ? 'cursor-default' : '',
         className
       )}

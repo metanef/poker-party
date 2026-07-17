@@ -141,7 +141,7 @@ export function SidebarChat({
           onChange={(e) => setInputText(e.target.value)}
           placeholder="Tapez un message..."
           maxLength={150}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 border border-white/5 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 transition-all duration-200"
+          className="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 border border-white/5 text-slate-100 text-base sm:text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 transition-all duration-200"
         />
         <button
           type="submit"

@@ -49,7 +49,7 @@ export function ExchangeConsole({ cards, isExchangeActive, hasActed, className =
   return (
     <div className={`flex flex-col items-center w-full max-w-2xl mx-auto ${className}`}>
       {/* Cards Row */}
-      <div className="flex justify-center items-end h-32 sm:h-48 space-x-1.5 sm:space-x-4 mb-4 sm:mb-6">
+      <div className="flex justify-center items-end h-32 sm:h-48 -space-x-1 sm:space-x-4 mb-4 sm:mb-6">
         {cards.map((card, idx) => (
           <PlayingCard
             key={idx}

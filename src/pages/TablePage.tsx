@@ -46,13 +46,21 @@ export default function TablePage() {
     if (isSidebarOpen) {
       setUnreadCount(0);
     } else {
-      const diff = table.logs.length - lastLogsCountRef.current;
-      if (diff > 0) {
-        setUnreadCount((prev) => prev + diff);
+      const prevCount = lastLogsCountRef.current;
+      const newLogs = table.logs.slice(prevCount);
+      if (newLogs.length > 0) {
+        // Count only chat messages from other players
+        const unreadChatCount = newLogs.filter(
+          log => log.type !== 'system' && log.playerId !== transport.localPlayerId
+        ).length;
+        
+        if (unreadChatCount > 0) {
+          setUnreadCount((prev) => prev + unreadChatCount);
+        }
       }
     }
     lastLogsCountRef.current = table.logs.length;
-  }, [table?.logs, isSidebarOpen]);
+  }, [table?.logs, isSidebarOpen, transport.localPlayerId]);
 
   // Auto-reconnect if already in table
   useEffect(() => {
@@ -168,7 +176,7 @@ export default function TablePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Pseudo</label>
               <input 
                 type="text" value={pseudo} onChange={(e) => setPseudo(e.target.value)}
-                className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-teal-500 outline-none"
+                className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-teal-500 outline-none"
                 placeholder="Votre pseudo" required
               />
             </div>
@@ -377,7 +385,8 @@ export default function TablePage() {
       <div className="flex-1 flex flex-col h-[100dvh] relative overflow-hidden">
         
         {/* Top Bar */}
-        <div className="h-16 flex items-center justify-between px-6 z-20 border-b border-white/5 bg-black/20">
+        <div className="pt-safe-game bg-black/20 border-b border-white/5 z-[60]">
+          <div className="h-16 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <div className="font-mono text-sm tracking-widest text-gray-500 bg-black/40 px-3 py-1 rounded-md">
               {table.code}
@@ -409,6 +418,7 @@ export default function TablePage() {
             >
               <LogOut className="w-4 h-4" />
             </button>
+          </div>
           </div>
         </div>
 
@@ -461,7 +471,7 @@ export default function TablePage() {
 
         {/* Showdown Result Overlay */}
         {isShowdown && table.lastHandResult && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 pt-20 overflow-y-auto">
             <HandResultBanner 
               result={table.lastHandResult} 
               players={table.players} 
@@ -481,7 +491,7 @@ export default function TablePage() {
       </div>
 
       {/* Local Player Area (Bottom) */}
-      <div className="w-full flex flex-col items-center pb-6 pt-4 bg-gradient-to-t from-black/80 to-transparent z-20 relative">
+      <div className="w-full flex flex-col items-center pb-safe-game pt-4 bg-gradient-to-t from-black/80 to-transparent z-20 relative">
         
         {/* Emotes */}
         <div className="absolute -top-14 left-4 z-30">
@@ -556,7 +566,7 @@ export default function TablePage() {
 
       {/* Sidebar Chat (Right Side) */}
       {isSidebarOpen && (
-        <div className="w-full md:w-80 h-[100dvh] absolute md:relative right-0 top-0 z-[70] md:z-20 transition-all duration-300">
+        <div className="w-full md:w-80 h-[100dvh] absolute md:relative right-0 top-0 z-[70] transition-all duration-300">
           <SidebarChat 
             logs={table.logs || []}
             localPlayerId={transport.localPlayerId}

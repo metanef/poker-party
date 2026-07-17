@@ -111,4 +111,20 @@ h1, h2, h3, h4, h5, h6, .font-title {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  
+  .pt-safe-game {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .pb-safe-game {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+}
+
+button, a, input, select, [role="button"], .cursor-pointer {
+  touch-action: manipulation;
+}
+
+.select-none {
+  -webkit-touch-callout: none;
 }

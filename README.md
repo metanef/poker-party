@@ -134,7 +134,7 @@ Voici une liste d'améliorations prévues ou recommandées pour enrichir l'expé
 - [x] **Historique des mains & Chat textuel** : Ajouter un panneau latéral pour lire le déroulement des actions passées (ex. *"Joueur 1 a changé 2 cartes"*, *"Joueur 2 a remporté la main avec un Brelan"*) et discuter en direct.
 - [ ] **Retour Haptique & Effets Sonores** : Ajouter des bruitages subtils lors de la donne des cartes, du minuteur de tour et des émotes, avec vibration sur smartphone pour renforcer l'immersion.
 - [x] **Gestion avancée des Déconnexions** : Faciliter la reconnexion automatique en cours de manche sans bloquer la FSM (Machine à États) et attribuer le statut de bot temporaire en cas d'absence.
-- [ ] **Responsivité iPhone** : Optimiser l'affichage et l'adaptation de l'interface pour les iPhones.
+- [x] **Responsivité iPhone** : Optimiser l'affichage et l'adaptation de l'interface pour les iPhones.
 - [x] **Optimisation des réactions / émotes** : Réduire le nombre de réactions à 4 maximum (coeur, lunettes, colérique, visage qui rit) et les cacher sur la gauche sur téléphone dans un volet qui se déplie. Et les faire apparaître uniquement de manière temporaire lorsqu'elles sont envoyées.
 - [x] **Cartes de l'adversaire plus grandes** : Afficher les cartes de l'adversaire en plus gros lors de la révélation à la fin de la manche. Et lors de la partie afficher seulement deux cartes cachées à la place des 5 actuelles.
 - [x] **Main adverse sur l'écran de fin** : Afficher la main de l'adversaire en plus de la nôtre sur l'écran de victoire ou de défaite.

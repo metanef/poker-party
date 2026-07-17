@@ -100,7 +100,7 @@ export default function LobbyPage() {
                   value={pseudo}
                   onChange={(e) => setPseudo(e.target.value)}
                   placeholder="Comment vous appelez-vous ?"
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-felt-accent transition-all"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-felt-accent transition-all"
                   maxLength={15}
                 />
               </div>
@@ -190,7 +190,7 @@ export default function LobbyPage() {
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 placeholder="Ex: ABCDEF"
-                className="w-full sm:flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 font-mono text-center tracking-widest placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 uppercase"
+                className="w-full sm:flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 text-base font-mono text-center tracking-widest placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 uppercase"
                 maxLength={6}
               />
               <button 
