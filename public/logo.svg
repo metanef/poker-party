@@ -4,7 +4,7 @@
   <rect x="5" y="5" width="86" height="110" rx="8" stroke="#F3F4F6" stroke-width="1" fill="none"/>
 
   <!-- Center Joker Head -->
-  <g transform="translate(48, 60)">
+  <g transform="translate(48, 64)">
     <!-- Jester Hat 3 Peaks (Rendered behind head) -->
     <!-- Left Drooping Peak (Pink / Red) -->
     <path d="M-16 0 C-32 -10 -36 -24 -24 -24 C-16 -24 -10 -12 0 0 Z" fill="#EC4899"/>
