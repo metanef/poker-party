@@ -1,27 +1,41 @@
-# Poker Party 🃏 (v1.0 - Version Finale)
+<div align="center">
 
-🔗 **Jouer en ligne** : [https://metanef.github.io/poker-party/](https://metanef.github.io/poker-party/)
+  <img src="public/logo.svg" width="110" height="110" alt="Poker Party Logo" />
 
-🎉 **Version 1.0 Officielle** : Le gameplay complet, la responsivité iOS/iPhone, la personnalisation du lobby, le chat avec notifications intelligentes, l'écran de fin clair et l'animation de vêtement qui brûle sont intégralement finalisés et prêts à être joués !
+  # Poker Party 🃏
 
-**Poker Party** est une application web moderne et responsive de jeu de cartes inspiré du Poker avec un enjeu de déshabillage symbolique. Jouable en temps réel entre amis via **Firebase** ou en mode **Solo contre des bots**.
+  **Un jeu de cartes multijoueur en temps réel moderne avec enjeu de déshabillage symbolique.**
+
+  [![Live Demo](https://img.shields.io/badge/LIVE_DEMO-JOUEUR_EN_LIGNE-22c55e?style=for-the-badge&logo=githubpages&logoColor=white)](https://metanef.github.io/poker-party/)
+  [![v1.0](https://img.shields.io/badge/VERSION-1.0_FINALE-8b5cf6?style=for-the-badge)](https://github.com/metanef/poker-party)
+
+  <br />
+
+  [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react&logoColor=black)](#)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript&logoColor=white)](#)
+  [![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=flat-square&logo=vite&logoColor=white)](#)
+  [![Firebase](https://img.shields.io/badge/Firebase-Realtime_DB-FFCA28?style=flat-square&logo=firebase&logoColor=black)](#)
+  [![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4-38BDF8?style=flat-square&logo=tailwindcss&logoColor=white)](#)
+  [![Zustand](https://img.shields.io/badge/Zustand-4.5-764ABC?style=flat-square)](#)
+
+</div>
 
 ---
 
 ## ✨ Caractéristiques
 
-- 🎴 **Poker d'échange** : 5 cartes en main + 5 cartes communes. Échanges à chaque étape (Flop, Turn, River).
-- 👔 **Système de vêtements & points** : Le perdant de la manche retire 1 vêtement. Gagner 3 manches permet de racheter un vêtement.
-- 📱 **100% Mobile & Responsive** : Interface fluide pensée pour smartphones (iOS / Android) et PC.
-- ⚡ **Temps réel ou Solo** : Jouez à plusieurs en direct ou entraînez-vous contre des bots locaux.
-- 🔥 **Animations de Showdown** : Effets visuels lorsqu'un joueur finit nu.
+- 🎴 **Poker d'échange** : 5 cartes en main + 5 cartes communes. Échanges stratégiques à chaque étape (Flop, Turn, River).
+- 👔 **Système de vêtements & points** : Le perdant de la manche retire 1 vêtement. Accumuler 3 points permet de racheter un vêtement.
+- 📱 **100% Mobile & iOS Responsive** : Interface fluide pensée pour smartphones (iPhone / Android) et PC.
+- ⚡ **Temps réel ou Solo** : Jouez à plusieurs en direct ou contre des IA locales en mode hors-ligne.
+- 🔥 **Animations de Showdown** : Animation dramatique de vêtement qui prend feu lorsqu'un joueur se retrouve nu.
 
 ---
 
 ## 🕹️ Règles rapides
 
 1. **Donne initiale** : 5 cartes privées par joueur.
-2. **Phase d'échange** : Échangez jusqu'à 5 cartes au Flop, au Turn et à la River pour former la meilleure combinaison de 5 cartes.
+2. **Phase d'échange** : Échangez de 0 à 5 cartes au Flop, au Turn et à la River pour former la meilleure combinaison.
 3. **Showdown** : 
    - **Gagnant** : +1 point.
    - **Perdant** : Retire 1 vêtement (👕).
@@ -30,89 +44,30 @@
 
 ---
 
+## 🛠️ Stack Technique
+
+| Technologie | Usage |
+| :--- | :--- |
+| **React 18** | Framework UI composable |
+| **TypeScript** | Typage strict du moteur de jeu et des données |
+| **Vite** | Build tool ultra-rapide |
+| **Firebase Realtime DB** | Synchronisation multijoueur décentralisée en temps réel |
+| **Zustand** | Gestion de l'état global léger |
+| **Tailwind CSS** | Styling modern dark casino & animations CSS |
+
+---
+
 ## 🚀 Lancement local
 
 ```bash
-# Installer les dépendances
+# 1. Installer les dépendances
 pnpm install
 
-# Lancer le serveur local
+# 2. Lancer le serveur de développement
 pnpm run dev
 ```
 
 Ouvrez `http://localhost:5173` dans votre navigateur.
-
----
-
-## 🔧 Configuration Firebase pour le Multijoueur
-
-Pour jouer à plusieurs sur internet, vous devez connecter l'application à un projet Firebase.
-
-### 1. Créer le Projet Firebase
-1. Rendez-vous sur la [Firebase Console](https://console.firebase.google.com/).
-2. Cliquez sur **Ajouter un projet**, attribuez-lui un nom (ex: `poker-party`), et finalisez la création.
-
-### 2. Activer l'Authentification Anonyme
-1. Dans le menu de gauche, allez dans **Build > Authentication**.
-2. Cliquez sur **Commencer**, puis sous l'onglet **Méthode de connexion**, activez le fournisseur **Anonyme**.
-
-### 3. Créer la Realtime Database
-1. Dans le menu de gauche, allez dans **Build > Realtime Database**.
-2. Cliquez sur **Créer une base de données**.
-3. **IMPORTANT** : Choisissez la région la plus proche (ex: `europe-west1` pour l'Europe).
-4. Sélectionnez le mode **Test** pour commencer (l'écriture/lecture sera ouverte temporairement).
-
-### 4. Configurer les variables d'environnement
-Créez un fichier nommé `.env` à la racine du projet (copiez `.env.example` si besoin) :
-
-```env
-VITE_FIREBASE_API_KEY=AIzaSyCHICjg1iz6-_...
-VITE_FIREBASE_AUTH_DOMAIN=poker-party-XXXX.firebaseapp.com
-VITE_FIREBASE_DATABASE_URL=https://poker-party-XXXX-default-rtdb.europe-west1.firebasedatabase.app
-VITE_FIREBASE_PROJECT_ID=poker-party-XXXX
-VITE_FIREBASE_APP_ID=1:1016193433912:web:46745...
-```
-
-*Relancez votre serveur de développement local (`pnpm run dev`) pour charger ces nouvelles variables.*
-
----
-
-## 🛡️ Règles de Sécurité de la Base de Données
-
-Afin d'éviter la triche (comme le fait qu'un joueur lise les cartes d'un autre dans la console réseau), appliquez les règles de sécurité incluses :
-
-1. Dans votre Firebase Console, allez dans **Realtime Database > Règles** (Rules).
-2. Remplacez le code existant par le contenu du fichier `firebase.rules.json` présent à la racine de ce dépôt.
-3. Cliquez sur **Publier**.
-
-> [!TIP]
-> **Problème de Permission Denied ?**
-> Si Firebase refuse des accès, assurez-vous d'avoir bien sélectionné la bonne instance de base de données dans le menu déroulant de la console Firebase (si vous avez créé votre base de données en Belgique, sélectionnez l'onglet `europe-west1` au lieu de `us-central1` par défaut en haut de l'écran des Règles).
-
----
-
-## 🌐 Déploiement sur GitHub Pages
-
-L'application intègre un déploiement automatisé via **GitHub Actions**.
-
-### 1. Configuration sur GitHub
-Dans les paramètres de votre dépôt GitHub (**Settings > Secrets and variables > Actions**), ajoutez les secrets suivants avec les valeurs de votre Firebase :
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN`
-- `VITE_FIREBASE_DATABASE_URL`
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_APP_ID`
-
-### 2. Base Path du Projet
-Dans le fichier `vite.config.github-pages.ts`, assurez-vous que la clé `base` correspond au nom de votre dépôt GitHub :
-```ts
-base: '/poker-party/', // Remplacez par le nom de votre dépôt
-```
-
-### 3. Activation
-Dans votre dépôt GitHub, allez dans **Settings > Pages**. Sous **Build and deployment > Source**, sélectionnez **GitHub Actions**.
-
-Désormais, à chaque fois que vous ferez un `git push` sur la branche `main`, le site sera automatiquement compilé et mis en ligne.
 
 ---
 
@@ -131,4 +86,3 @@ Désormais, à chaque fois que vous ferez un `git push` sur la branche `main`, l
 
 ### 🔄 À venir (Planned)
 - [ ] **Version Anglaise (i18n)** : Traduction bilingue Français / Anglais.
-
