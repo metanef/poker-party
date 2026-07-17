@@ -1,56 +1,44 @@
 # Poker Party 🃏
 
-Une application web moderne, dynamique et élégante de jeu de cartes inspiré des règles du Poker avec un enjeu de déshabillage progressif (purement textuel et symbolique). Le jeu est conçu pour être joué entre amis, en temps réel, grâce à une architecture décentralisée basée sur **Firebase Realtime Database** et hébergée de manière 100 % statique sur **GitHub Pages**.
+🔗 **Jouer en ligne** : [https://metanef.github.io/poker-party/](https://metanef.github.io/poker-party/)
 
-En cas d'absence de configuration Firebase, l'application bascule automatiquement en mode **Solo/Hors-ligne** vous permettant de jouer contre des intelligences artificielles locales.
-
----
-
-## 🎨 Caractéristiques & Design
-- **Esthétique Soignée** : Interface inspirée des tapis de casino haut de gamme (couleurs feutre vert/sombre, animations fluides des cartes via `framer-motion`, design responsive fluide adapté aux mobiles).
-- **Temps Réel Multijoueur** : Synchronisation immédiate des actions des joueurs grâce au Realtime Database de Firebase.
-- **Mode Solo Intégré** : IA locale simulant le comportement d'adversaires pour s'entraîner ou tester l'application hors-ligne.
-- **Fonctionnalités Interactives** : Émoticônes animés en direct, minuteur de tour dynamique, gestion de la pause par l'hôte.
-- **Sécurité et Consentement** : Écran d'avertissement et consentement explicite obligatoire avant de rejoindre une table de jeu.
+**Poker Party** est une application web moderne et responsive de jeu de cartes inspiré du Poker avec un enjeu de déshabillage symbolique. Jouable en temps réel entre amis via **Firebase** ou en mode **Solo contre des bots**.
 
 ---
 
-## 🕹️ Déroulement et Règles du Jeu
+## ✨ Caractéristiques
 
-Le jeu utilise l'ordre standard des combinaisons du Poker (Paire, Double Paire, Brelan, Suite, Couleur, Full, Carré, Quinte Flush), mais sans aucun système de jetons ou de mises.
-
-1. **La Donne** : Chaque joueur reçoit 5 cartes fermées (visibles uniquement par lui).
-2. **Les Rues d'Échange** : À chaque phase de dévoilement du tableau (Flop, Turn, River), chaque joueur choisit de garder ou d'échanger un certain nombre de cartes de sa main pour tenter d'améliorer sa combinaison :
-   - **Flop** (3 cartes communes révélées) : Premier échange (choix de 0 à 5 cartes à jeter et remplacer).
-   - **Turn** (4e carte commune révélée) : Deuxième échange.
-   - **River** (5e carte commune révélée) : Troisième et dernier échange.
-3. **Le Showdown** : Les mains privées sont dévoilées.
-   - **Le Gagnant** : Le joueur avec la meilleure combinaison de 5 cartes (cartes privées + cartes communes) gagne **+1 point**.
-   - **Le Perdant** : Le joueur avec la moins bonne combinaison **perd un vêtement** (représenté par un compteur numérique).
-4. **La Règle des 3 points** : Lorsqu'un joueur accumule **3 points**, il peut choisir de les échanger pour *remettre un vêtement* (remettant son compteur de points à zéro).
-5. **Fin de partie** : La partie prend fin dès qu'un joueur n'a plus aucun vêtement.
-
-*Note sur les Égalités : En cas d'ex aequo pour la meilleure ou la pire main, personne ne gagne de point ou ne perd de vêtement pour ce tour.*
+- 🎴 **Poker d'échange** : 5 cartes en main + 5 cartes communes. Échanges à chaque étape (Flop, Turn, River).
+- 👔 **Système de vêtements & points** : Le perdant de la manche retire 1 vêtement. Gagner 3 manches permet de racheter un vêtement.
+- 📱 **100% Mobile & Responsive** : Interface fluide pensée pour smartphones (iOS / Android) et PC.
+- ⚡ **Temps réel ou Solo** : Jouez à plusieurs en direct ou entraînez-vous contre des bots locaux.
+- 🔥 **Animations de Showdown** : Effets visuels lorsqu'un joueur finit nu.
 
 ---
 
-## 🚀 Lancement Rapide en Local
+## 🕹️ Règles rapides
 
-### Prérequis
-Vous devez disposer de [Node.js](https://nodejs.org/) (v18+) et de [pnpm](https://pnpm.io/) installés sur votre machine.
+1. **Donne initiale** : 5 cartes privées par joueur.
+2. **Phase d'échange** : Échangez jusqu'à 5 cartes au Flop, au Turn et à la River pour former la meilleure combinaison de 5 cartes.
+3. **Showdown** : 
+   - **Gagnant** : +1 point.
+   - **Perdant** : Retire 1 vêtement (👕).
+4. **Rachat** : 3 points accumulés permettent de récupérer 1 vêtement.
+5. **Fin de partie** : La partie se termine dès qu'un joueur n'a plus aucun vêtement.
+
+---
+
+## 🚀 Lancement local
 
 ```bash
-# 1. Installer les dépendances
+# Installer les dépendances
 pnpm install
 
-# 2. Lancer le serveur de développement local (Vite)
+# Lancer le serveur local
 pnpm run dev
-
-# 3. Lancer les tests unitaires (Vitest)
-pnpm run test
 ```
 
-Une fois le serveur démarré, ouvrez `http://localhost:5173` dans votre navigateur. Sans configuration de base de données, vous jouerez directement contre des bots.
+Ouvrez `http://localhost:5173` dans votre navigateur.
 
 ---
 
@@ -126,19 +114,19 @@ Désormais, à chaque fois que vous ferez un `git push` sur la branche `main`, l
 
 ---
 
-## 🗺️ TODO / Évolutions Futures
+## 🗺️ Roadmap & TODO
 
-Voici une liste d'améliorations prévues ou recommandées pour enrichir l'expérience utilisateur et la robustesse de l'application :
+### ✅ Fait (Done)
+- [x] **Responsivité Mobile & iPhone** : Adaptation de la table de jeu, encoches iOS (`viewport-fit=cover`, `pt-safe-game`, `pb-safe-game`).
+- [x] **Historique des mains & Chat textuel** : Panneau latéral déroulant avec logs d'actions et chat en direct.
+- [x] **Gestion des Déconnexions** : Reconnexion automatique sans blocage de la FSM et attribution de bots temporaires.
+- [x] **Optimisation des Réactions / Émotes** : Volet dépliable latéral à 4 émotes avec apparition temporaire.
+- [x] **Affichage des Cartes Adverses** : Cartes agrandies au Showdown et vue épurée à 2 cartes cachées pendant les manches.
+- [x] **Écran de Fin de Partie** : Classement final ordonné par victoires, statut nu mis en avant, boutons Relancer et Quitter.
+- [x] **Paramètres In-Game** : Configuration complète dans le lobby (joueurs, vêtements initiaux, coût de rachat).
+- [x] **Validation Manche Suivante** : Bouton Prêt obligatoire pour les joueurs avant le lancement par l'hôte.
+- [x] **Effets Visuels de Showdown** : Animation dramatique de vêtement qui prend feu et brûle lorsqu'un joueur finit nu.
 
-- [x] **Optimisation Responsivité Mobile complète** : Ajuster la disposition de la table de jeu (notamment les sièges des adversaires et le plateau central) sur les petits écrans en mode portrait.
-- [x] **Historique des mains & Chat textuel** : Ajouter un panneau latéral pour lire le déroulement des actions passées (ex. *"Joueur 1 a changé 2 cartes"*, *"Joueur 2 a remporté la main avec un Brelan"*) et discuter en direct.
-- [ ] **Retour Haptique & Effets Sonores** : Ajouter des bruitages subtils lors de la donne des cartes, du minuteur de tour et des émotes, avec vibration sur smartphone pour renforcer l'immersion.
-- [x] **Gestion avancée des Déconnexions** : Faciliter la reconnexion automatique en cours de manche sans bloquer la FSM (Machine à États) et attribuer le statut de bot temporaire en cas d'absence.
-- [x] **Responsivité iPhone** : Optimiser l'affichage et l'adaptation de l'interface pour les iPhones.
-- [x] **Optimisation des réactions / émotes** : Réduire le nombre de réactions à 4 maximum (coeur, lunettes, colérique, visage qui rit) et les cacher sur la gauche sur téléphone dans un volet qui se déplie. Et les faire apparaître uniquement de manière temporaire lorsqu'elles sont envoyées.
-- [x] **Cartes de l'adversaire plus grandes** : Afficher les cartes de l'adversaire en plus gros lors de la révélation à la fin de la manche. Et lors de la partie afficher seulement deux cartes cachées à la place des 5 actuelles.
-- [x] **Main adverse sur l'écran de fin** : Afficher la main de l'adversaire en plus de la nôtre sur l'écran de victoire ou de défaite.
-- [x] **Paramètres in game** : pouvoir changer les parametres dans le lobby (nombre de joueurs, vetements donc de tours, nombre de points pour racheter un vetement, ...)
-- [x] **Manche suivante** : les autre joueurs doivent mettre ready avant que le joueur host puisse lancer la manche suivante.
-- [x] **Ecran de fin plus clair** : lorsque la partie complète est finie, afficher un ecran de fin avec le nombre de manches gagnées par chacun et l'ordre des joueurs selon le nombre de manches gagnées. Préciser qui a perdu et est nu. Et un bouton pour relancer une partie. Et un bouton pour quitter la partie.
+### 🔄 À venir (Planned)
+- [ ] **Version Anglaise (i18n)** : Traduction bilingue Français / Anglais.
 

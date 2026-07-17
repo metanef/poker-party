@@ -9,7 +9,7 @@ import { ExchangeConsole } from '@/ui/components/ExchangeConsole';
 import { TurnTimer } from '@/ui/components/TurnTimer';
 import { EmotePicker } from '@/ui/components/EmotePicker';
 import { PauseButton } from '@/ui/components/PauseButton';
-import { HandResultBanner } from '@/ui/components/HandResultBanner';
+import { HandResultBanner, BurningClothingAnimation } from '@/ui/components/HandResultBanner';
 import { PlayingCard } from '@/ui/components/PlayingCard';
 import { SidebarChat } from '@/ui/components/SidebarChat';
 import { LogOut, Home, UserPlus, AlertCircle, MessageSquare, Trophy, RefreshCw, Crown } from 'lucide-react';
@@ -247,8 +247,8 @@ export default function TablePage() {
           {/* Header */}
           <div className="flex flex-col items-center">
             {localNaked ? (
-              <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mb-4">
-                <AlertCircle className="w-10 h-10 text-red-500 animate-pulse" />
+              <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mb-4 relative overflow-hidden">
+                <BurningClothingAnimation className="scale-125" />
               </div>
             ) : (
               <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center justify-center mb-4">
@@ -268,11 +268,11 @@ export default function TablePage() {
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center">
               <p className="text-sm text-red-400 font-medium leading-relaxed">
                 {localNaked ? (
-                  "🤬 Vous n'avez plus de vêtement à retirer et finissez COMPLÈTEMENT NU ! 🔞"
+                  "🔞 Vous finissez COMPLÈTEMENT NU !"
                 ) : (
                   <>
                     🔞 <span className="font-bold">{nakedPlayers.map(p => p.pseudo).join(', ')}</span>{' '}
-                    {nakedPlayers.length > 1 ? "n'ont plus de vêtements et finissent NUS !" : "n'a plus de vêtement et finit NU !"}
+                    {nakedPlayers.length > 1 ? " finissent COMPLÈTEMENT NUS !" : "finit COMPLÈTEMENT NU !"}
                   </>
                 )}
               </p>

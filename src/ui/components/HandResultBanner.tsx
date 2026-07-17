@@ -4,6 +4,92 @@ import { Player } from '@/engine/model/Player';
 import { Trophy, AlertTriangle, ArrowRight, RefreshCw, Check, Clock } from 'lucide-react';
 import { PlayingCard } from './PlayingCard';
 
+export function BurningClothingAnimation({ className = '' }: { className?: string }) {
+  const sparks = React.useMemo(() => {
+    const elements = ['🔥'];
+    return Array.from({ length: 6 }).map((_, i) => {
+      const left = 15 + Math.random() * 70;
+      const delay = Math.random() * 0.8;
+      const duration = 0.9 + Math.random() * 0.9;
+      const x = (Math.random() - 0.5) * 30;
+      const y = -20 - Math.random() * 30;
+      const item = elements[Math.floor(Math.random() * elements.length)];
+      const size = 8 + Math.random() * 8;
+      return { left, delay, duration, x, y, item, size };
+    });
+  }, []);
+
+  return (
+    <div className={`relative w-10 h-10 flex items-center justify-center pointer-events-none ${className}`}>
+      <style>{`
+        @keyframes burn-clothes {
+          0% {
+            transform: scale(1) rotate(0deg);
+            filter: drop-shadow(0 0 2px #f97316);
+            opacity: 1;
+          }
+          30% {
+            transform: scale(1.15) rotate(-8deg);
+            filter: drop-shadow(0 0 10px #ef4444) brightness(1.5) sepia(0.8) hue-rotate(-20deg);
+            opacity: 1;
+          }
+          65% {
+            transform: scale(0.85) rotate(12deg) translateY(-6px);
+            filter: drop-shadow(0 0 15px #b91c1c) brightness(0.6) grayscale(0.5);
+            opacity: 0.8;
+          }
+          100% {
+            transform: scale(0.3) rotate(20deg) translateY(-20px);
+            filter: brightness(0.1) grayscale(1) blur(2px);
+            opacity: 0;
+          }
+        }
+        @keyframes clothing-ember {
+          0% {
+            transform: translate3d(0, 0, 0) scale(1);
+            opacity: 0;
+          }
+          20% {
+            opacity: 0.9;
+          }
+          100% {
+            transform: translate3d(var(--x), var(--y), 0) scale(0.2);
+            opacity: 0;
+          }
+        }
+      `}</style>
+
+      {sparks.map((s, idx) => (
+        <div
+          key={idx}
+          style={{
+            position: 'absolute',
+            bottom: '5px',
+            left: `${s.left}%`,
+            fontSize: `${s.size}px`,
+            animation: `clothing-ember ${s.duration}s ease-out ${s.delay}s infinite`,
+            '--x': `${s.x}px`,
+            '--y': `${s.y}px`,
+            zIndex: 10,
+          } as React.CSSProperties}
+        >
+          {s.item}
+        </div>
+      ))}
+
+      <div 
+        className="text-2xl select-none"
+        style={{
+          animation: 'burn-clothes 2.8s ease-in-out infinite',
+          zIndex: 5,
+        }}
+      >
+        👕
+      </div>
+    </div>
+  );
+}
+
 interface HandResultBannerProps {
   result: HandResult;
   players: Player[];
@@ -33,7 +119,8 @@ export function HandResultBanner({
 }: HandResultBannerProps) {
   const isWinner = result.winnerIds.includes(localPlayerId);
   const isLoser = result.loserIds.includes(localPlayerId);
-  
+  const localNude = isLoser && localPlayerClothingRemaining === 0;
+
   const host = players.find(p => p.isHost);
   const hostId = host?.id || '';
   const localPlayer = players.find(p => p.id === localPlayerId);
@@ -54,10 +141,19 @@ export function HandResultBanner({
   const canBuyback = localPlayerPoints >= buybackCost && localPlayerClothingRemaining < startingClothing;
 
   return (
-    <div className="w-full max-w-sm my-auto mx-auto bg-table-panel border border-table-border rounded-panel p-6 shadow-2xl flex flex-col items-center text-center space-y-4">
+    <div className="w-full max-w-sm my-auto mx-auto bg-table-panel border border-table-border rounded-panel p-6 shadow-2xl flex flex-col items-center text-center space-y-4 relative">
       {/* Top Banner (Action for local player) */}
       <div className="flex flex-col items-center w-full">
-        {isLoser ? (
+        {localNude ? (
+          <div className="bg-gradient-to-br from-red-950/60 via-red-900/40 to-orange-950/60 border border-red-500/40 rounded-xl p-4 w-full flex items-center justify-between relative overflow-hidden animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.25)]">
+            <BurningClothingAnimation className="z-20 shrink-0" />
+            <div className="flex flex-col text-center z-20">
+              <h3 className="font-title font-black text-red-400 text-lg tracking-wide uppercase drop-shadow">Vous êtes nu !</h3>
+              <p className="text-xs text-orange-300 mt-1 font-semibold">Tous vos vêtements ont brûlé !</p>
+            </div>
+            <BurningClothingAnimation className="z-20 shrink-0" />
+          </div>
+        ) : isLoser ? (
           <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 w-full flex flex-col items-center">
             <AlertTriangle className="w-8 h-8 text-red-400 mb-2" />
             <h3 className="font-title font-semibold text-red-400 text-lg">Vous avez perdu !</h3>
@@ -98,55 +194,64 @@ export function HandResultBanner({
             const isLocal = playerId === localPlayerId;
             const hasWon = result.winnerIds.includes(playerId);
             const hasLost = result.loserIds.includes(playerId);
+            const isNude = player.clothingRemaining === 0;
             
             return (
               <div 
                 key={playerId} 
-                className={`p-2.5 rounded-xl border flex flex-col gap-2 transition-all ${
+                className={`p-2.5 rounded-xl border flex flex-col gap-2 transition-all relative overflow-hidden ${
                   isLocal 
                     ? 'bg-felt-accent/10 border-felt-accent/30' 
                     : 'bg-black/20 border-white/5'
-                }`}
+                } ${isNude ? 'border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.15)]' : ''}`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between z-20">
                   <div className="flex items-center gap-1.5">
                     <span className="text-base">{player.avatar}</span>
                     <span className={`text-xs font-semibold ${isLocal ? 'text-felt-accent' : 'text-white'} truncate max-w-[120px]`}>
                       {player.pseudo} {isLocal && '(Vous)'}
                     </span>
+                    {isNude && (
+                      <span className="text-[9px] bg-red-600/90 text-white font-title px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold animate-pulse flex items-center gap-0.5">
+                        🔥 NU
+                      </span>
+                    )}
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex items-center gap-1">
                     {hasWon && (
                       <span className="text-[9px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded-full border border-amber-500/20 font-bold uppercase tracking-wider">
                         Gagne (+1)
                       </span>
                     )}
                     {hasLost && (
-                      <span className="text-[9px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded-full border border-red-500/20 font-bold uppercase tracking-wider">
-                        Perd (-1 👕)
-                      </span>
+                      <div className="flex items-center gap-0.5">
+                        {isNude && <BurningClothingAnimation className="scale-75 -my-3 -mx-2" />}
+                        <span className="text-[9px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded-full border border-red-500/20 font-bold uppercase tracking-wider">
+                          Perd (-1 👕)
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  {/* Cards */}
-                  <div className="flex -space-x-2.5">
-                    {player.holeCards && player.holeCards.map((c, i) => (
-                      <PlayingCard key={i} card={c} size="sm" className="shadow-md cursor-default pointer-events-none" />
-                    ))}
-                  </div>
-                  {/* Hand description */}
-                  <div className="flex flex-col">
-                    <span className="text-[9px] text-gray-500 uppercase tracking-wider font-semibold">Main</span>
-                    <span className="text-xs font-bold text-gray-200">{handLabel}</span>
+                <div className="flex items-center gap-3 z-20">
+                    {/* Cards */}
+                    <div className="flex -space-x-2.5">
+                      {player.holeCards && player.holeCards.map((c, i) => (
+                        <PlayingCard key={i} card={c} size="sm" className="shadow-md cursor-default pointer-events-none" />
+                      ))}
+                    </div>
+                    {/* Hand description */}
+                    <div className="flex flex-col">
+                      <span className="text-[9px] text-gray-500 uppercase tracking-wider font-semibold">Main</span>
+                      <span className="text-xs font-bold text-gray-200">{handLabel}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
 
       <div className="w-full h-px bg-table-border" />
 

@@ -17,6 +17,7 @@ export interface Player {
   holeCards: Card[];
   points: number;
   clothingRemaining: number;
+  startingClothing?: number;
   /** Folded/left the table entirely (kept seat but out of the game). */
   active: boolean;
   /** Whether this player has submitted their choice for the current exchange round. */
