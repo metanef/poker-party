@@ -56,12 +56,18 @@ h1, h2, h3, h4, h5, h6, .font-title {
 }
 
 .card-back-pattern {
-  background-color: var(--color-table-panel);
-  background-image: 
-    linear-gradient(45deg, var(--color-table-border) 25%, transparent 25%, transparent 75%, var(--color-table-border) 75%, var(--color-table-border)), 
-    linear-gradient(45deg, var(--color-table-border) 25%, transparent 25%, transparent 75%, var(--color-table-border) 75%, var(--color-table-border));
-  background-size: 16px 16px;
-  background-position: 0 0, 8px 8px;
+  background-color: #253b1e;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%231e293b'/%3E%3Cpath d='M12 0v24M0 12h24' stroke='%23334155' stroke-width='0.8'/%3E%3Cpath d='M12 0L24 12L12 24L0 12Z' stroke='%23475569' stroke-width='1.2' fill='none'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%231e293b' stroke='%23475569' stroke-width='1.2'/%3E%3Ccircle cx='12' cy='12' r='1' fill='%2394a3b8'/%3E%3Ccircle cx='0' cy='12' r='1.5' fill='%231e293b' stroke='%23475569' stroke-width='0.8'/%3E%3Ccircle cx='24' cy='12' r='1.5' fill='%231e293b' stroke='%23475569' stroke-width='0.8'/%3E%3Ccircle cx='12' cy='0' r='1.5' fill='%231e293b' stroke='%23475569' stroke-width='0.8'/%3E%3Ccircle cx='12' cy='24' r='1.5' fill='%231e293b' stroke='%23475569' stroke-width='0.8'/%3E%3C/svg%3E");
+  background-size: 14px 14px;
+  background-position: center;
+  border: 2px solid #2c2e4b;
+  box-shadow: 
+    0 0 0 1px #536a9b,
+    inset 0 0 0 1px #536a9b,
+    inset 0 0 0 2px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 3px #586881,
+    inset 0 0 0 4px #536a9b,
+    inset 0 0 8px rgba(0, 0, 0, 0.4);
 }
 
 @keyframes float-up {

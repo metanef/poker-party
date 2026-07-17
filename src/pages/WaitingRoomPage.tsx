@@ -31,7 +31,7 @@ export default function WaitingRoomPage({
   const isHost = hostId === localPlayerId;
   const isReady = localPlayer?.ready ?? false;
   
-  const canStart = isHost && players.length >= 2 && players.every(p => p.ready);
+  const canStart = isHost && players.length >= 2 && players.every(p => p.isHost || p.ready);
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/table/${code}`;
@@ -168,20 +168,22 @@ export default function WaitingRoomPage({
           )}
 
           <div className="mt-auto space-y-4">
-            <button
-              onClick={toggleReady}
-              className={`w-full py-4 rounded-full font-title font-bold text-lg transition-all shadow-lg flex justify-center items-center gap-2 ${
-                isReady 
-                  ? 'bg-table-bg border-2 border-felt-accent text-felt-accent hover:bg-felt-accent/10' 
-                  : 'bg-white text-table-bg hover:bg-gray-100 active:scale-[0.98]'
-              }`}
-            >
-              {isReady ? (
-                <><Check className="w-5 h-5" /> Prêt !</>
-              ) : (
-                'Je suis prêt'
-              )}
-            </button>
+            {!isHost && (
+              <button
+                onClick={toggleReady}
+                className={`w-full py-4 rounded-full font-title font-bold text-lg transition-all shadow-lg flex justify-center items-center gap-2 ${
+                  isReady 
+                    ? 'bg-table-bg border-2 border-felt-accent text-felt-accent hover:bg-felt-accent/10' 
+                    : 'bg-white text-table-bg hover:bg-gray-100 active:scale-[0.98]'
+                }`}
+              >
+                {isReady ? (
+                  <><Check className="w-5 h-5" /> Prêt !</>
+                ) : (
+                  'Je suis prêt'
+                )}
+              </button>
+            )}
             
             {isHost && (
               <button
@@ -217,7 +219,7 @@ export default function WaitingRoomPage({
                   <div className="w-10 h-10 rounded-full bg-table-panel flex items-center justify-center text-xl">
                     {p.avatar}
                   </div>
-                  {p.ready && (
+                  {(p.isHost || p.ready) && (
                     <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-0.5">
                       <Check className="w-2.5 h-2.5 text-white" />
                     </div>
@@ -227,8 +229,8 @@ export default function WaitingRoomPage({
                   <span className="text-sm font-medium text-white truncate">
                     {p.pseudo} {p.id === localPlayerId && <span className="text-gray-500 text-xs">(Vous)</span>}
                   </span>
-                  <span className={`text-xs ${p.ready ? 'text-green-400' : 'text-gray-500'}`}>
-                    {p.ready ? 'Prêt' : 'En attente'}
+                  <span className={`text-xs ${p.isHost || p.ready ? 'text-green-400' : 'text-gray-500'}`}>
+                    {p.isHost ? 'Organisateur' : (p.ready ? 'Prêt' : 'En attente')}
                   </span>
                 </div>
                 {p.isHost && (

@@ -49,8 +49,8 @@ export function PlayerSeat({ player, isLocal, isActiveTurn, isWaiting, className
         <div
           className={
             player.holeCards && player.holeCards.length > 0
-              ? "flex -space-x-3 mb-2 scale-100 sm:scale-110 origin-bottom opacity-100 z-30 transition-all duration-300"
-              : "flex -space-x-2 mb-2 scale-60 sm:scale-75 origin-bottom opacity-90"
+              ? "flex -space-x-3 mb-2 scale-110 sm:scale-125 origin-bottom opacity-100 z-30 transition-all duration-300"
+              : "flex -space-x-2.5 mb-2 scale-85 sm:scale-100 origin-bottom opacity-90 z-20 transition-all duration-300"
           }
         >
            {player.holeCards && player.holeCards.length > 0 ? (
