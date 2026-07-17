@@ -41,12 +41,17 @@ export function useTableSocket() {
   useEffect(() => {
     const unsubTable = transport.subscribe(setTable);
     const unsubHand = transport.subscribePrivateHand(setPrivateHand);
-    const unsubEmotes = transport.subscribeEmotes((event) =>
+    const unsubEmotes = transport.subscribeEmotes((event) => {
+      const id = `${event.playerId}-${event.at}-${Math.random().toString(36).slice(2, 6)}`;
       pushEmote({
-        id: `${event.playerId}-${event.at}-${Math.random().toString(36).slice(2, 6)}`,
+        id,
         ...event,
-      }),
-    );
+      });
+      // Automatically prune this emote from the store after 2.5 seconds (gives time for fade out)
+      setTimeout(() => {
+        useTableStore.getState().pruneOldEmotes(Date.now(), 2500);
+      }, 2600);
+    });
     return () => {
       unsubTable();
       unsubHand();

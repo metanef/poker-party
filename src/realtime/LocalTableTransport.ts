@@ -92,6 +92,7 @@ export class LocalTableTransport implements ITableTransport {
       hostId: this.localPlayerId,
       maxPlayers: params.maxPlayers,
       startingClothing: params.startingClothing,
+      buybackCost: params.buybackCost,
       createdAt: Date.now(),
     });
 
@@ -149,6 +150,49 @@ export class LocalTableTransport implements ITableTransport {
     this.deck = null;
     this.notifyTable();
     this.notifyPrivateHand();
+  }
+
+  async updateTableSettings(params: { maxPlayers: number; startingClothing: number; buybackCost: number }): Promise<void> {
+    if (!this.table) return;
+    this.table.maxPlayers = params.maxPlayers;
+    this.table.startingClothing = params.startingClothing;
+    this.table.buybackCost = params.buybackCost;
+
+    // Adjust players and bots to match new maxPlayers
+    const host = this.table.players.find(p => p.id === this.localPlayerId);
+    if (!host) return;
+
+    host.startingClothing = params.startingClothing;
+    host.clothingRemaining = params.startingClothing;
+
+    const newPlayers: Player[] = [host];
+    const botCountNeeded = params.maxPlayers - 1;
+    const existingBots = this.table.players.filter(p => p.id !== this.localPlayerId);
+
+    for (let i = 0; i < botCountNeeded; i++) {
+      if (i < existingBots.length) {
+        const bot = existingBots[i];
+        bot.startingClothing = params.startingClothing;
+        bot.clothingRemaining = params.startingClothing;
+        bot.seatIndex = i + 1;
+        newPlayers.push(bot);
+      } else {
+        const bot = createPlayer({
+          id: `bot-${i}-${randomId()}`,
+          pseudo: BOT_NAMES[i % BOT_NAMES.length],
+          avatar: BOT_AVATARS[i % BOT_AVATARS.length],
+          seatIndex: i + 1,
+          isHost: false,
+          startingClothing: params.startingClothing,
+        });
+        bot.consentGiven = true;
+        bot.ready = true;
+        newPlayers.push(bot);
+      }
+    }
+
+    this.table.players = newPlayers;
+    this.notifyTable();
   }
 
   async sendConsent(): Promise<void> {

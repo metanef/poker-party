@@ -171,6 +171,8 @@ export default function TablePage() {
         hostId={table.hostId}
         localPlayerId={transport.localPlayerId}
         maxPlayers={table.maxPlayers}
+        startingClothing={table.startingClothing}
+        buybackCost={table.buybackCost ?? 3}
       />
     );
   }
@@ -301,6 +303,7 @@ export default function TablePage() {
               localPlayerPoints={localPlayer.points}
               localPlayerClothingRemaining={localPlayer.clothingRemaining}
               startingClothing={table.startingClothing}
+              buybackCost={table.buybackCost ?? 3}
               onRestoreClothing={() => transport.sendRestoreClothing().catch(console.error)}
             />
           </div>
@@ -322,11 +325,11 @@ export default function TablePage() {
              <span className="text-white font-medium text-xs md:text-sm">{localPlayer.pseudo}</span>
              <span className="text-rank-gold font-bold text-sm md:text-lg">{localPlayer.points} pts</span>
              <span className="text-[10px] md:text-xs text-gray-400">👕 {localPlayer.clothingRemaining} restant{localPlayer.clothingRemaining > 1 ? 's' : ''}</span>
-             {localPlayer.points >= 3 && (
+             {localPlayer.points >= (table.buybackCost ?? 3) && (
                <button
                  onClick={() => transport.sendRestoreClothing().catch(console.error)}
                  className="text-[10px] md:text-xs bg-felt-accent text-table-bg font-title font-semibold px-2 md:px-3 py-1 md:py-1.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg whitespace-nowrap"
-                 title="Remettre un vêtement et repartir de 0 point"
+                 title={`Remettre un vêtement (coût : ${table.buybackCost ?? 3} pts)`}
                >
                  Récupérer un vêtement
                </button>

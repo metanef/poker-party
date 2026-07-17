@@ -13,6 +13,7 @@ export interface CreateTableParams {
   avatar: string;
   maxPlayers: number;
   startingClothing: number;
+  buybackCost?: number;
 }
 
 export interface JoinTableParams {
@@ -56,6 +57,9 @@ export interface ITableTransport {
 
   /** Host-only: permanently deletes the current table and its lobby entry. */
   deleteTable(): Promise<void>;
+
+  /** Host-only: updates the game settings in the lobby. */
+  updateTableSettings(params: { maxPlayers: number; startingClothing: number; buybackCost: number }): Promise<void>;
 
   /** Records this player's explicit consent for the current table. */
   sendConsent(): Promise<void>;

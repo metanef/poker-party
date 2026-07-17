@@ -60,7 +60,7 @@ export function ExchangeConsole({ cards, isExchangeActive, hasActed, className =
             className={!isExchangeActive || hasActed ? 'cursor-default opacity-90' : 'cursor-pointer hover:-translate-y-1 hover:shadow-lg transition-all'}
           />
         ))}
-        {cards.length === 0 && Array.from({length: 5}).map((_, i) => (
+        {cards.length === 0 && Array.from({length: 2}).map((_, i) => (
           <PlayingCard key={i} size="lg" className="opacity-50" />
         ))}
       </div>

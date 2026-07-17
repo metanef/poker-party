@@ -27,6 +27,7 @@ export interface TableState {
   hostId: string;
   maxPlayers: number;
   startingClothing: number;
+  buybackCost: number;
   stage: Stage;
   handNumber: number;
   /** Community river cards revealed so far (0 to 5). */
@@ -49,6 +50,7 @@ export function createEmptyTable(params: {
   hostId: string;
   maxPlayers: number;
   startingClothing: number;
+  buybackCost?: number;
   createdAt: number;
 }): TableState {
   return {
@@ -56,6 +58,7 @@ export function createEmptyTable(params: {
     hostId: params.hostId,
     maxPlayers: params.maxPlayers,
     startingClothing: params.startingClothing,
+    buybackCost: params.buybackCost ?? 3,
     stage: 'lobby',
     handNumber: 0,
     communityCards: [],

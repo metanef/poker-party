@@ -520,6 +520,7 @@ export class FirebaseTableTransport implements ITableTransport {
       hostId: uid,
       maxPlayers: params.maxPlayers,
       startingClothing: params.startingClothing,
+      buybackCost: params.buybackCost,
       createdAt: Date.now(),
     });
 
@@ -647,6 +648,28 @@ export class FirebaseTableTransport implements ITableTransport {
     this.processedIntents.clear();
     this.tableListeners.forEach((l) => l(null));
     this.privateHandListeners.forEach((l) => l(null));
+  }
+
+  async updateTableSettings(params: { maxPlayers: number; startingClothing: number; buybackCost: number }): Promise<void> {
+    await this.ensureAuth();
+    if (!this.isHostClient || !this.hostTable) {
+      throw new Error("Seul l'hote peut modifier les parametres de la table.");
+    }
+
+    const currentConnectedCount = this.hostTable.players.length;
+    const resolvedMaxPlayers = Math.max(currentConnectedCount, params.maxPlayers);
+
+    this.hostTable.maxPlayers = resolvedMaxPlayers;
+    this.hostTable.startingClothing = params.startingClothing;
+    this.hostTable.buybackCost = params.buybackCost;
+
+    // Update existing players' starting clothing & remaining clothing in the lobby
+    for (const player of this.hostTable.players) {
+      player.startingClothing = params.startingClothing;
+      player.clothingRemaining = params.startingClothing;
+    }
+
+    await this.hostPublish(this.hostTable);
   }
 
   async sendConsent(): Promise<void> {

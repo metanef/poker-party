@@ -136,7 +136,8 @@ Voici une liste d'améliorations prévues ou recommandées pour enrichir l'expé
 - [ ] **Statistiques Joueurs** : Suivi des scores globaux et taux de victoires par session de jeu.
 - [ ] **Gestion avancée des Déconnexions** : Faciliter la reconnexion automatique en cours de manche sans bloquer la FSM (Machine à États) et attribuer le statut de bot temporaire en cas d'absence.
 - [ ] **Responsivité iPhone** : Optimiser l'affichage et l'adaptation de l'interface pour les iPhones.
-- [ ] **Optimisation des réactions / émotes** : Réduire le nombre de réactions et les faire apparaître uniquement de manière temporaire lorsqu'elles sont envoyées.
-- [ ] **Cartes de l'adversaire plus grandes** : Afficher les cartes de l'adversaire en plus gros lors de la révélation à la fin de la manche.
-- [ ] **Main adverse sur l'écran de fin** : Afficher la main de l'adversaire en plus de la nôtre sur l'écran de victoire ou de défaite.
+- [x] **Optimisation des réactions / émotes** : Réduire le nombre de réactions à 4 maximum (coeur, lunettes, colérique, visage qui rit) et les cacher sur la gauche sur téléphone dans un volet qui se déplie. Et les faire apparaître uniquement de manière temporaire lorsqu'elles sont envoyées.
+- [x] **Cartes de l'adversaire plus grandes** : Afficher les cartes de l'adversaire en plus gros lors de la révélation à la fin de la manche. Et lors de la partie afficher seulement deux cartes cachées à la place des 5 actuelles.
+- [x] **Main adverse sur l'écran de fin** : Afficher la main de l'adversaire en plus de la nôtre sur l'écran de victoire ou de défaite.
+- [x] **Paramètres in game** : pouvoir changer les parametres dans le lobby (nombre de joueurs, vetements donc de tours, nombre de points pour racheter un vetement, ...)
 

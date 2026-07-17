@@ -11,9 +11,19 @@ interface WaitingRoomPageProps {
   hostId: string;
   localPlayerId: string;
   maxPlayers: number;
+  startingClothing: number;
+  buybackCost: number;
 }
 
-export default function WaitingRoomPage({ code, players, hostId, localPlayerId, maxPlayers }: WaitingRoomPageProps) {
+export default function WaitingRoomPage({
+  code,
+  players,
+  hostId,
+  localPlayerId,
+  maxPlayers,
+  startingClothing,
+  buybackCost,
+}: WaitingRoomPageProps) {
   const [, setLocation] = useLocation();
   const [copied, setCopied] = useState(false);
   
@@ -60,7 +70,7 @@ export default function WaitingRoomPage({ code, players, hostId, localPlayerId, 
             <p className="text-gray-400 text-sm">En attente des autres joueurs...</p>
           </div>
           
-          <div className="bg-black/40 rounded-2xl p-5 border border-white/5 mb-8">
+          <div className="bg-black/40 rounded-2xl p-5 border border-white/5 mb-6">
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">
               Code de la table
             </label>
@@ -78,6 +88,84 @@ export default function WaitingRoomPage({ code, players, hostId, localPlayerId, 
             </div>
             {copied && <p className="text-green-400 text-xs mt-2 font-medium">Lien copié dans le presse-papiers !</p>}
           </div>
+
+          {/* Configuration / Paramètres Section */}
+          {isHost ? (
+            <div className="bg-black/40 rounded-2xl p-4 border border-white/5 mb-6 flex flex-col gap-3">
+              <label className="text-xs font-semibold text-felt-accent uppercase tracking-wider block">
+                ⚙️ Paramètres de la partie
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-[10px] text-gray-400 font-bold uppercase mb-1">Joueurs max</label>
+                  <select 
+                    value={maxPlayers}
+                    onChange={(e) => {
+                      const nextMax = Number(e.target.value);
+                      getTransport().updateTableSettings({ maxPlayers: nextMax, startingClothing, buybackCost }).catch(console.error);
+                    }}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-felt-accent cursor-pointer"
+                  >
+                    {[2, 3, 4].filter(n => n >= players.length).map(n => (
+                      <option key={n} value={n} className="bg-table-panel text-white">{n} joueurs</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-[10px] text-gray-400 font-bold uppercase mb-1">Garde-robe</label>
+                  <select 
+                    value={startingClothing}
+                    onChange={(e) => {
+                      const nextClothing = Number(e.target.value);
+                      getTransport().updateTableSettings({ maxPlayers, startingClothing: nextClothing, buybackCost }).catch(console.error);
+                    }}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-felt-accent cursor-pointer"
+                  >
+                    {[3, 4, 5, 6, 7, 8].map(n => (
+                      <option key={n} value={n} className="bg-table-panel text-white">{n} vêtements</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-gray-400 font-bold uppercase mb-1">Coût rachat</label>
+                  <select 
+                    value={buybackCost}
+                    onChange={(e) => {
+                      const nextCost = Number(e.target.value);
+                      getTransport().updateTableSettings({ maxPlayers, startingClothing, buybackCost: nextCost }).catch(console.error);
+                    }}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-felt-accent cursor-pointer"
+                  >
+                    {[2, 3, 4, 5].map(n => (
+                      <option key={n} value={n} className="bg-table-panel text-white">{n} pts</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-black/40 rounded-2xl p-4 border border-white/5 mb-6 flex flex-col gap-2">
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block">
+                Configuration de la partie
+              </label>
+              <div className="grid grid-cols-3 gap-2 mt-1">
+                <div className="bg-white/5 rounded-xl p-2.5 text-center">
+                  <span className="block text-[10px] text-gray-400 font-semibold uppercase">Joueurs</span>
+                  <span className="text-xs font-bold text-white mt-0.5 block">{maxPlayers} max</span>
+                </div>
+                <div className="bg-white/5 rounded-xl p-2.5 text-center">
+                  <span className="block text-[10px] text-gray-400 font-semibold uppercase">Garde-robe</span>
+                  <span className="text-xs font-bold text-white mt-0.5 block">{startingClothing} 👕</span>
+                </div>
+                <div className="bg-white/5 rounded-xl p-2.5 text-center">
+                  <span className="block text-[10px] text-gray-400 font-semibold uppercase">Coût Rachat</span>
+                  <span className="text-xs font-bold text-white mt-0.5 block">{buybackCost} pts</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-auto space-y-4">
             <button

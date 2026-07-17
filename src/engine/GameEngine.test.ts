@@ -144,4 +144,18 @@ describe('the 3-point clothing restoration rule', () => {
     expect(updated.clothingRemaining).toBe(4);
     expect(updated.points).toBe(1);
   });
+
+  it('respects a custom buybackCost when restoring clothing', () => {
+    let table = makeTable(2);
+    table.buybackCost = 2;
+    const player = table.players.find((p) => p.id === 'p0')!;
+    player.points = 2;
+    player.clothingRemaining = 4;
+
+    table = restoreClothing(table, 'p0');
+
+    const updated = table.players.find((p) => p.id === 'p0')!;
+    expect(updated.clothingRemaining).toBe(5);
+    expect(updated.points).toBe(0);
+  });
 });

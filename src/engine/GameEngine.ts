@@ -287,11 +287,12 @@ export function resolveShowdown(table: TableState): TableState {
  */
 export function restoreClothing(table: TableState, playerId: string): TableState {
   const player = table.players.find((p) => p.id === playerId);
-  if (!player || player.points < 3) return table;
+  const cost = table.buybackCost ?? 3;
+  if (!player || player.points < cost) return table;
   const next = cloneTable(table);
   const nextPlayer = next.players.find((p) => p.id === playerId) as Player;
   nextPlayer.clothingRemaining += 1;
-  nextPlayer.points -= 3;
+  nextPlayer.points -= cost;
   
   const loggedTable = addLog(next, 'system', `${player.pseudo} a racheté un vêtement (👕 +1, score : ${nextPlayer.points}).`);
   return loggedTable;

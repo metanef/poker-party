@@ -14,6 +14,7 @@ export default function LobbyPage() {
   
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [startingClothing, setStartingClothing] = useState(6);
+  const [buybackCost, setBuybackCost] = useState(3);
   
   const [openTables, setOpenTables] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +40,8 @@ export default function LobbyPage() {
         pseudo,
         avatar,
         maxPlayers,
-        startingClothing
+        startingClothing,
+        buybackCost
       });
       setLocation(`/table/${code}`);
     } catch (err) {
@@ -131,25 +133,35 @@ export default function LobbyPage() {
             <h2 className="font-title text-xl font-semibold text-gray-900 mb-6">Créer une table</h2>
             
             <form onSubmit={handleCreate} className="space-y-5 relative z-10">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Joueurs max</label>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Joueurs max</label>
                   <select 
                     value={maxPlayers}
                     onChange={(e) => setMaxPlayers(Number(e.target.value))}
-                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    className="w-full bg-white border border-gray-200 rounded-xl px-2 py-2.5 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-400"
                   >
                     {[2, 3, 4].map(n => <option key={n} value={n}>{n} joueurs</option>)}
                   </select>
                 </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Vêtements</label>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Vêtements</label>
                   <select 
                     value={startingClothing}
                     onChange={(e) => setStartingClothing(Number(e.target.value))}
-                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    className="w-full bg-white border border-gray-200 rounded-xl px-2 py-2.5 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-400"
                   >
-                    {[3, 4, 5, 6, 7, 8].map(n => <option key={n} value={n}>{n}</option>)}
+                    {[3, 4, 5, 6, 7, 8].map(n => <option key={n} value={n}>{n} 👕</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5" title="Points requis pour racheter un vêtement">Points rachat</label>
+                  <select 
+                    value={buybackCost}
+                    onChange={(e) => setBuybackCost(Number(e.target.value))}
+                    className="w-full bg-white border border-gray-200 rounded-xl px-2 py-2.5 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  >
+                    {[2, 3, 4, 5].map(n => <option key={n} value={n}>{n} pts</option>)}
                   </select>
                 </div>
               </div>
