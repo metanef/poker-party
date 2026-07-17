@@ -12,7 +12,7 @@ import { PauseButton } from '@/ui/components/PauseButton';
 import { HandResultBanner } from '@/ui/components/HandResultBanner';
 import { PlayingCard } from '@/ui/components/PlayingCard';
 import { SidebarChat } from '@/ui/components/SidebarChat';
-import { LogOut, Home, UserPlus, AlertCircle, MessageSquare } from 'lucide-react';
+import { LogOut, Home, UserPlus, AlertCircle, MessageSquare, Trophy, RefreshCw, Crown } from 'lucide-react';
 
 export default function TablePage() {
   const { code } = useParams<{ code: string }>();
@@ -27,6 +27,10 @@ export default function TablePage() {
   const [pseudo, setPseudo] = useState('');
   const [avatar, setAvatar] = useState('👻');
   const [isJoining, setIsJoining] = useState(false);
+  const [isCheckingReconnect, setIsCheckingReconnect] = useState(true);
+  const [hasJoinedSession, setHasJoinedSession] = useState(() => {
+    return transport.getCurrentTableCode() === code;
+  });
 
   const lastAnnouncedHand = useRef<number | null>(null);
   const [showRoundAnnounce, setShowRoundAnnounce] = useState(false);
@@ -50,18 +54,60 @@ export default function TablePage() {
     lastLogsCountRef.current = table.logs.length;
   }, [table?.logs, isSidebarOpen]);
 
+  // Auto-reconnect if already in table
+  useEffect(() => {
+    if (!code) {
+      setIsCheckingReconnect(false);
+      return;
+    }
+
+    if (transport.getCurrentTableCode() === code) {
+      setHasJoinedSession(true);
+      setNeedsToJoin(false);
+      setIsCheckingReconnect(false);
+      return;
+    }
+    
+    let isMounted = true;
+    const tryReconnect = async () => {
+      try {
+        const success = await transport.tryAutoReconnect(code);
+        if (success && isMounted) {
+          setHasJoinedSession(true);
+          setNeedsToJoin(false);
+        } else if (isMounted) {
+          setNeedsToJoin(true);
+        }
+      } catch (err) {
+        console.error("Auto-reconnection failed:", err);
+        if (isMounted) setNeedsToJoin(true);
+      } finally {
+        if (isMounted) {
+          setIsCheckingReconnect(false);
+        }
+      }
+    };
+    
+    tryReconnect();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [code, transport]);
+
   // Check if we need to show the join form
   useEffect(() => {
-    // Give it a tiny delay to see if transport connects and gets state
+    if (isCheckingReconnect || hasJoinedSession) return;
+    
     const timer = setTimeout(() => {
       if (!table || !table.players.some(p => p.id === transport.localPlayerId)) {
         setNeedsToJoin(true);
       } else {
         setNeedsToJoin(false);
       }
-    }, 500);
+    }, 200);
     return () => clearTimeout(timer);
-  }, [table, transport.localPlayerId]);
+  }, [table, transport.localPlayerId, isCheckingReconnect, hasJoinedSession]);
 
   // Round start announcement effect
   useEffect(() => {
@@ -86,6 +132,7 @@ export default function TablePage() {
     setIsJoining(true);
     try {
       await transport.joinTable({ code, pseudo, avatar });
+      setHasJoinedSession(true);
       setNeedsToJoin(false);
     } catch (err) {
       console.error(err);
@@ -98,7 +145,9 @@ export default function TablePage() {
   if (!table && !needsToJoin) {
     return (
       <div className="min-h-[100dvh] bg-table-bg flex items-center justify-center">
-        <div className="text-felt-accent animate-pulse font-title">Connexion à la table...</div>
+        <div className="text-felt-accent animate-pulse font-title">
+          {isCheckingReconnect ? 'Reconnexion en cours...' : 'Connexion à la table...'}
+        </div>
       </div>
     );
   }
@@ -179,18 +228,137 @@ export default function TablePage() {
 
   // 5. Game Over
   if (table.gameOverMessage) {
+    const isHost = table.hostId === transport.localPlayerId;
+    const sortedPlayers = [...table.players].sort((a, b) => b.points - a.points);
+    const nakedPlayers = table.players.filter((p) => p.clothingRemaining === 0);
+    const localNaked = nakedPlayers.some((p) => p.id === transport.localPlayerId);
+
     return (
-      <div className="min-h-[100dvh] bg-table-bg flex items-center justify-center p-4">
-        <div className="bg-table-panel border border-table-border rounded-panel p-8 max-w-md w-full text-center shadow-2xl">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="font-title text-2xl font-bold text-white mb-4">Partie Terminée</h2>
-          <p className="text-gray-300 mb-8">{table.gameOverMessage}</p>
-          <button 
-            onClick={() => { transport.leaveTable(); setLocation('/'); }}
-            className="bg-white text-table-bg font-title font-semibold px-6 py-3 rounded-full hover:bg-gray-200 transition-colors"
-          >
-            Retour au lobby
-          </button>
+      <div className="min-h-[100dvh] bg-table-bg flex items-center justify-center p-4 relative overflow-y-auto">
+        <div className="bg-table-panel border border-table-border rounded-panel p-6 max-w-lg w-full text-center shadow-2xl flex flex-col gap-6 my-auto animate-fade-in">
+          {/* Header */}
+          <div className="flex flex-col items-center">
+            {localNaked ? (
+              <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mb-4">
+                <AlertCircle className="w-10 h-10 text-red-500 animate-pulse" />
+              </div>
+            ) : (
+              <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center justify-center mb-4">
+                <Trophy className="w-10 h-10 text-amber-400" />
+              </div>
+            )}
+            <h2 className="font-title text-3xl font-extrabold text-white tracking-tight">
+              Partie Terminée
+            </h2>
+            <p className="text-gray-400 text-xs mt-1 uppercase tracking-widest font-semibold">
+              Classement Final
+            </p>
+          </div>
+
+          {/* Naked Announcement */}
+          {nakedPlayers.length > 0 && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center">
+              <p className="text-sm text-red-400 font-medium leading-relaxed">
+                {localNaked ? (
+                  "🤬 Vous n'avez plus de vêtement à retirer et finissez COMPLÈTEMENT NU ! 🔞"
+                ) : (
+                  <>
+                    🔞 <span className="font-bold">{nakedPlayers.map(p => p.pseudo).join(', ')}</span>{' '}
+                    {nakedPlayers.length > 1 ? "n'ont plus de vêtements et finissent NUS !" : "n'a plus de vêtement et finit NU !"}
+                  </>
+                )}
+              </p>
+            </div>
+          )}
+
+          {/* Scoreboard List */}
+          <div className="space-y-2 text-left">
+            {sortedPlayers.map((player, index) => {
+              const isNaked = player.clothingRemaining === 0;
+              const isPlayerLocal = player.id === transport.localPlayerId;
+              const isPlayerHost = player.id === table.hostId;
+
+              // Placement symbols
+              let rankSymbol = `${index + 1}e`;
+              let rankColor = 'text-gray-400';
+              if (index === 0) {
+                rankSymbol = '🥇';
+                rankColor = 'text-amber-400';
+              } else if (index === 1) {
+                rankSymbol = '🥈';
+                rankColor = 'text-slate-300';
+              } else if (index === 2) {
+                rankSymbol = '🥉';
+                rankColor = 'text-amber-600';
+              }
+
+              return (
+                <div
+                  key={player.id}
+                  className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                    isPlayerLocal
+                      ? 'bg-felt-accent/15 border-felt-accent/35 shadow-inner'
+                      : 'bg-black/20 border-white/5'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`text-lg font-bold w-6 text-center ${rankColor}`}>
+                      {rankSymbol}
+                    </span>
+                    <span className="text-xl">{player.avatar}</span>
+                    <div className="flex flex-col">
+                      <span className={`text-sm font-semibold flex items-center gap-1.5 ${isPlayerLocal ? 'text-felt-accent' : 'text-white'}`}>
+                        {player.pseudo} {isPlayerLocal && '(Vous)'}
+                        {isPlayerHost && <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20 animate-pulse" />}
+                      </span>
+                      <span className="text-[10px] text-gray-500">
+                        {isNaked ? '🔞 Éliminé (Nu)' : `👕 ${player.clothingRemaining} vêtements restants`}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-sm font-bold text-white block">
+                      {player.points} {player.points > 1 ? 'manches' : 'manche'}
+                    </span>
+                    <span className="text-[9px] text-gray-400 uppercase tracking-wider font-medium font-title">
+                      gagnée{player.points > 1 && 's'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 mt-2">
+            <button
+              onClick={() => {
+                transport.leaveTable().catch(console.error);
+                setLocation('/');
+              }}
+              className="flex-1 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-title font-semibold py-3 px-6 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              Quitter la partie
+            </button>
+
+            {isHost ? (
+              <button
+                onClick={() => {
+                  transport.restartGame().catch(console.error);
+                }}
+                className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-table-bg font-title font-bold py-3 px-6 rounded-xl transition-all active:scale-95 shadow-lg shadow-amber-500/10 flex items-center justify-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Relancer une partie
+              </button>
+            ) : (
+              <div className="flex-1 bg-white/5 border border-dashed border-white/10 text-gray-400 text-xs py-3 px-6 rounded-xl flex items-center justify-center">
+                En attente de l'hôte pour relancer...
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -293,7 +461,7 @@ export default function TablePage() {
 
         {/* Showdown Result Overlay */}
         {isShowdown && table.lastHandResult && (
-          <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
             <HandResultBanner 
               result={table.lastHandResult} 
               players={table.players} 
@@ -305,6 +473,7 @@ export default function TablePage() {
               startingClothing={table.startingClothing}
               buybackCost={table.buybackCost ?? 3}
               onRestoreClothing={() => transport.sendRestoreClothing().catch(console.error)}
+              onToggleReady={() => transport.sendReady(!localPlayer.ready).catch(console.error)}
             />
           </div>
         )}

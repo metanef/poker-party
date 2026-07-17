@@ -253,6 +253,13 @@ export function resolveShowdown(table: TableState): TableState {
   next.lastHandResult = result;
   next.gameOverMessage = gameOverMessage;
 
+  // Reset ready state for next hand check
+  for (const player of next.players) {
+    const isBot = player.id.startsWith('bot-');
+    const isHost = player.id === next.hostId;
+    player.ready = isBot || isHost;
+  }
+
   let loggedTable = next;
   if (winners.length > 0) {
     const winnerNames = winners.map((w) => w.player.pseudo).join(', ');
@@ -277,6 +284,38 @@ export function resolveShowdown(table: TableState): TableState {
     loggedTable = addLog(loggedTable, 'system', `Fin de la partie : ${gameOverMessage}`);
   }
 
+  return loggedTable;
+}
+
+/**
+ * Restarts the game, resetting players' points to 0, resetting clothing to the starting clothing,
+ * clearing community cards, and setting stage back to 'lobby'.
+ */
+export function restartGame(table: TableState): TableState {
+  const next = cloneTable(table);
+  next.stage = 'lobby';
+  next.gameOverMessage = null;
+  next.lastHandResult = null;
+  next.communityCards = [];
+  next.deckSize = 52;
+  next.handNumber = 0;
+  next.paused = false;
+
+  for (const player of next.players) {
+    player.clothingRemaining = next.startingClothing;
+    player.points = 0;
+    player.holeCards = [];
+    player.hasActedThisRound = false;
+    player.lastChoice = null;
+    player.active = true;
+    
+    // Set host and bots to ready, other human players to not ready
+    const isBot = player.id.startsWith('bot-');
+    const isHost = player.id === next.hostId;
+    player.ready = isBot || isHost;
+  }
+
+  const loggedTable = addLog(next, 'system', "La partie a été relancée par l'hôte ! Bon jeu !");
   return loggedTable;
 }
 

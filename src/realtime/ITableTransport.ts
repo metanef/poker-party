@@ -46,11 +46,17 @@ export interface ITableTransport {
   /** The stable id of the local player on this device/browser. */
   readonly localPlayerId: string;
 
+  /** Gets the current table code the transport is connected to, if any. */
+  getCurrentTableCode(): string | null;
+
   /** Creates a new table and returns its short room code. Caller becomes host. */
   createTable(params: CreateTableParams): Promise<string>;
 
   /** Joins an existing table by its short code. */
   joinTable(params: JoinTableParams): Promise<void>;
+
+  /** Attempts to automatically reconnect to an existing table if the player is already registered. */
+  tryAutoReconnect(code: string): Promise<boolean>;
 
   /** Leaves the current table. */
   leaveTable(): Promise<void>;
@@ -72,6 +78,9 @@ export interface ITableTransport {
 
   /** Host-only: starts the next hand/round after a showdown. */
   startNextHand(): Promise<void>;
+
+  /** Host-only: restarts the game after game over, resetting clothes and points. */
+  restartGame(): Promise<void>;
 
   /** Sends this player's exchange decision as an intent -- never computed locally. */
   sendExchangeChoice(choice: ExchangeChoice): Promise<void>;

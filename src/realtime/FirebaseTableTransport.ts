@@ -11,9 +11,11 @@ import {
   onValue,
   off,
   remove,
+  onDisconnect,
   type DatabaseReference,
   type DataSnapshot,
 } from 'firebase/database';
+import { isExchangeStage } from '../engine/fsm/stages';
 import {
   advancePastExchange,
   applyExchangeChoice,
@@ -29,6 +31,7 @@ import {
   resumeTable,
   startHand,
   addLog,
+  restartGame,
 } from '../engine/GameEngine';
 import { Deck } from '../engine/model/Deck';
 import { createPlayer, type ExchangeChoice } from '../engine/model/Player';
@@ -78,6 +81,7 @@ export class FirebaseTableTransport implements ITableTransport {
 
   private currentTableCode: string | null = null;
   private isHostClient = false;
+  private lastConnectTime = 0;
 
   // État interne côté hôte uniquement
   private hostTable: TableState | null = null;
@@ -89,6 +93,7 @@ export class FirebaseTableTransport implements ITableTransport {
   private privateUnsub: (() => void) | null = null;
   private emotesUnsub: (() => void) | null = null;
   private intentsUnsub: (() => void) | null = null;
+  private presenceUnsub: (() => void) | null = null;
 
   // Listeners applicatifs
   private tableListeners = new Set<(table: TableState | null) => void>();
@@ -103,10 +108,22 @@ export class FirebaseTableTransport implements ITableTransport {
       this._authReadyResolve = resolve;
     });
     this._initAuth();
+
+    // Listen to Firebase connection state to prevent immediate bot actions on reconnection
+    const connectedRef = ref(this.db(), '.info/connected');
+    onValue(connectedRef, (snap) => {
+      if (snap.val() === true) {
+        this.lastConnectTime = Date.now();
+      }
+    });
   }
 
   get localPlayerId(): string {
     return this._localPlayerId;
+  }
+
+  getCurrentTableCode(): string | null {
+    return this.currentTableCode;
   }
 
   // ---------------------------------------------------------------------------
@@ -241,6 +258,7 @@ export class FirebaseTableTransport implements ITableTransport {
       EXCHANGE_TIMEOUT_MS,
     );
     void this.hostPublish(this.hostTable);
+    this.triggerTemporaryBotActionsIfNeeded();
     this.scheduleHost(
       () => this.hostCheckExchangeCompletion(round),
       EXCHANGE_TIMEOUT_MS + 250,
@@ -402,6 +420,14 @@ export class FirebaseTableTransport implements ITableTransport {
         }
         break;
       }
+      case 'restartGame': {
+        if (this.hostTable && uid === this.hostTable.hostId) {
+          this.hostTable = restartGame(this.hostTable);
+          this.hostDeck = null;
+          void this.hostPublish(this.hostTable);
+        }
+        break;
+      }
       case 'chat': {
         const content = data.content as string;
         const player = this.hostTable.players.find((p) => p.id === uid);
@@ -492,6 +518,90 @@ export class FirebaseTableTransport implements ITableTransport {
   }
 
   // ---------------------------------------------------------------------------
+  // Présence et bot temporaire
+  // ---------------------------------------------------------------------------
+
+  private setupPresence(code: string, uid: string): void {
+    const db = this.db();
+    const presenceRef = ref(db, `tables/${code}/presence/${uid}`);
+    void set(presenceRef, true);
+    void onDisconnect(presenceRef).remove();
+  }
+
+  private startListeningPresence(code: string): void {
+    if (this.presenceUnsub) this.presenceUnsub();
+    const db = this.db();
+    const presenceRef = ref(db, `tables/${code}/presence`);
+    const handler = (snap: DataSnapshot) => {
+      if (!this.hostTable) return;
+      const presenceData = snap.val() as Record<string, boolean> | null;
+      let changed = false;
+
+      const updatedPlayers = this.hostTable.players.map((p) => {
+        const isOnline = presenceData ? Boolean(presenceData[p.id]) : false;
+        const isHost = p.id === this.hostTable?.hostId;
+        const isBot = p.id.startsWith('bot-');
+        const shouldBeConnected = isOnline || isHost || isBot;
+
+        if (p.connected !== shouldBeConnected) {
+          p.connected = shouldBeConnected;
+          changed = true;
+          const status = shouldBeConnected ? "s'est connecté" : "s'est déconnecté (remplacé par un bot temporaire)";
+          this.hostTable = addLog(this.hostTable!, 'system', `${p.pseudo} ${status}.`);
+        }
+        return p;
+      });
+
+      if (changed) {
+        this.hostTable.players = updatedPlayers;
+        void this.hostPublish(this.hostTable);
+        this.triggerTemporaryBotActionsIfNeeded();
+      }
+    };
+    onValue(presenceRef, handler);
+    this.presenceUnsub = () => off(presenceRef, 'value', handler);
+  }
+
+  private triggerTemporaryBotActionsIfNeeded(): void {
+    if (!this.hostTable || !isExchangeStage(this.hostTable.stage) || !this.hostDeck) return;
+
+    // Do not trigger bot actions if the host client itself just connected/reconnected in the last 5 seconds
+    if (Date.now() - this.lastConnectTime < 5000) {
+      return;
+    }
+
+    for (const player of this.hostTable.players) {
+      if (player.active && !player.connected && !player.hasActedThisRound) {
+        const playerId = player.id;
+        const delay = 8000 + Math.random() * 2000;
+        this.scheduleHost(() => {
+          if (!this.hostTable || !this.hostDeck) return;
+          const p = this.hostTable.players.find((x) => x.id === playerId);
+          if (!p || !p.active || p.connected || p.hasActedThisRound) return;
+
+          const choice: ExchangeChoice =
+            Math.random() < 0.4
+              ? { type: 'keep' }
+              : {
+                  type: 'change',
+                  cardIndices: Math.random() < 0.5 ? [0] : [0, 1],
+                };
+
+          const result = applyExchangeChoice(this.hostTable, playerId, choice, this.hostDeck);
+          if (result.valid) {
+            this.hostTable = result.table;
+            void this.hostPublish(this.hostTable);
+            if (isExchangeRoundComplete(this.hostTable, Date.now())) {
+              this.clearHostTimers();
+              this.hostFinishExchangeRound();
+            }
+          }
+        }, delay);
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Nettoyage
   // ---------------------------------------------------------------------------
 
@@ -504,6 +614,8 @@ export class FirebaseTableTransport implements ITableTransport {
     this.emotesUnsub = null;
     this.intentsUnsub?.();
     this.intentsUnsub = null;
+    this.presenceUnsub?.();
+    this.presenceUnsub = null;
   }
 
   // ---------------------------------------------------------------------------
@@ -549,6 +661,8 @@ export class FirebaseTableTransport implements ITableTransport {
     this.startListeningPrivate(code, uid);
     this.startListeningEmotes(code);
     this.startListeningIntents(code);
+    this.setupPresence(code, uid);
+    this.startListeningPresence(code);
 
     return code;
   }
@@ -568,16 +682,17 @@ export class FirebaseTableTransport implements ITableTransport {
     if (!table) {
       throw new Error('Donnees de table invalides. Veuillez reessayer.');
     }
-    if (table.stage !== 'lobby') {
-      throw new Error(
-        'Cette partie est deja en cours. Impossible de rejoindre maintenant.',
-      );
-    }
 
     // Verifier si le joueur est deja assis (reconnexion)
     const existingPlayer = Array.isArray(table.players)
       ? table.players.find((p) => p.id === uid)
       : undefined;
+
+    if (table.stage !== 'lobby' && !existingPlayer) {
+      throw new Error(
+        'Cette partie est deja en cours. Impossible de rejoindre maintenant.',
+      );
+    }
 
     if (!existingPlayer) {
       const playerCount = Array.isArray(table.players) ? table.players.length : 0;
@@ -612,9 +727,55 @@ export class FirebaseTableTransport implements ITableTransport {
     this.startListeningPublic(code);
     this.startListeningPrivate(code, uid);
     this.startListeningEmotes(code);
+    this.setupPresence(code, uid);
+  }
+
+  async tryAutoReconnect(code: string): Promise<boolean> {
+    await this.ensureAuth();
+    const uid = this._localPlayerId;
+
+    const snap = await get(this.publicRef(code));
+    if (!snap.exists()) return false;
+
+    const table = this.deserializeTable(snap.val());
+    if (!table) return false;
+
+    const player = table.players.find((p) => p.id === uid);
+    if (!player) return false;
+
+    this.currentTableCode = code;
+    this.isHostClient = player.isHost;
+
+    if (this.isHostClient) {
+      this.hostTable = table;
+      this.hostDeck = Deck.shuffled();
+
+      this.startListeningIntents(code);
+      this.startListeningPresence(code);
+
+      if (isExchangeStage(table.stage) && table.exchangeDeadline) {
+        const timeRemaining = table.exchangeDeadline - Date.now();
+        this.scheduleHost(
+          () => this.hostFinishExchangeRound(),
+          Math.max(0, timeRemaining + 250),
+        );
+      }
+    }
+
+    this.startListeningPublic(code);
+    this.startListeningPrivate(code, uid);
+    this.startListeningEmotes(code);
+    this.setupPresence(code, uid);
+
+    return true;
   }
 
   async leaveTable(): Promise<void> {
+    const code = this.currentTableCode;
+    const uid = this._localPlayerId;
+    if (code && uid) {
+      void remove(ref(this.db(), `tables/${code}/presence/${uid}`));
+    }
     this.clearHostTimers();
     this.stopAllListeners();
     this.currentTableCode = null;
@@ -746,6 +907,16 @@ export class FirebaseTableTransport implements ITableTransport {
       return;
     }
     await this.sendIntent({ type: 'startNextHand' });
+  }
+
+  async restartGame(): Promise<void> {
+    if (this.isHostClient && this.hostTable) {
+      this.hostTable = restartGame(this.hostTable);
+      this.hostDeck = null;
+      await this.hostPublish(this.hostTable);
+      return;
+    }
+    await this.sendIntent({ type: 'restartGame' });
   }
 
   async sendRestoreClothing(): Promise<void> {

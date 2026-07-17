@@ -159,3 +159,57 @@ describe('the 3-point clothing restoration rule', () => {
     expect(updated.points).toBe(0);
   });
 });
+
+describe('resolveShowdown', () => {
+  it('resets player ready states, setting host and bots to true, others to false', () => {
+    let table = makeTable(3);
+    // Let's set some players' ready states to true before showdown
+    table.players[0].ready = true; // host
+    table.players[1].ready = true; // non-host player 1
+    table.players[2].ready = true; // non-host player 2
+    
+    // Add a bot
+    table.players.push(
+      createPlayer({
+        id: 'bot-1',
+        pseudo: 'Bot 1',
+        avatar: '🤖',
+        seatIndex: 3,
+        startingClothing: 6,
+      })
+    );
+    
+    // Set stage and cards to allow showdown resolution
+    table.stage = 'river';
+    for (const player of table.players) {
+      player.active = true;
+      player.holeCards = [
+        { suit: 'hearts', rank: 'A' },
+        { suit: 'diamonds', rank: 'K' },
+      ];
+    }
+    table.communityCards = [
+      { suit: 'spades', rank: 'Q' },
+      { suit: 'clubs', rank: 'J' },
+      { suit: 'hearts', rank: '10' },
+      { suit: 'diamonds', rank: '2' },
+      { suit: 'clubs', rank: '3' },
+    ];
+    
+    table = resolveShowdown(table);
+    
+    expect(table.stage).toBe('showdown');
+    
+    // Check ready states after resolveShowdown
+    const host = table.players.find((p) => p.id === 'p0')!;
+    const bot = table.players.find((p) => p.id === 'bot-1')!;
+    const human1 = table.players.find((p) => p.id === 'p1')!;
+    const human2 = table.players.find((p) => p.id === 'p2')!;
+    
+    expect(host.ready).toBe(true);  // host is ready by default
+    expect(bot.ready).toBe(true);   // bot is ready by default
+    expect(human1.ready).toBe(false); // other human player is reset to false
+    expect(human2.ready).toBe(false); // other human player is reset to false
+  });
+});
+

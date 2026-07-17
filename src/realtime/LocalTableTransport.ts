@@ -13,6 +13,7 @@ import {
   resumeTable,
   startHand,
   addLog,
+  restartGame,
 } from '../engine/GameEngine';
 import { Deck } from '../engine/model/Deck';
 import { createPlayer, type ExchangeChoice, type Player } from '../engine/model/Player';
@@ -44,6 +45,10 @@ function randomId(): string {
  */
 export class LocalTableTransport implements ITableTransport {
   readonly localPlayerId = randomId();
+
+  getCurrentTableCode(): string | null {
+    return this.table?.code || null;
+  }
 
   private table: TableState | null = null;
   private deck: Deck | null = null;
@@ -131,6 +136,13 @@ export class LocalTableTransport implements ITableTransport {
     throw new Error(
       "Le mode solo ne permet pas de rejoindre une table : créez votre propre table contre des IA.",
     );
+  }
+
+  async tryAutoReconnect(code: string): Promise<boolean> {
+    if (this.table && this.table.code === code) {
+      return true;
+    }
+    return false;
   }
 
   async leaveTable(): Promise<void> {
@@ -311,6 +323,14 @@ export class LocalTableTransport implements ITableTransport {
     this.notifyTable();
     this.notifyPrivateHand();
     this.schedule(() => this.runExchangeRound(1), REVEAL_PAUSE_MS);
+  }
+
+  async restartGame(): Promise<void> {
+    if (!this.table || this.table.hostId !== this.localPlayerId) return;
+    this.table = restartGame(this.table);
+    this.deck = null;
+    this.notifyTable();
+    this.notifyPrivateHand();
   }
 
   async sendExchangeChoice(choice: ExchangeChoice): Promise<void> {
