@@ -2,10 +2,11 @@ import React, { useEffect, useState, useRef } from 'react';
 
 interface TurnTimerProps {
   deadline: number | null;
+  paused?: boolean;
   className?: string;
 }
 
-export function TurnTimer({ deadline, className = '' }: TurnTimerProps) {
+export function TurnTimer({ deadline, paused = false, className = '' }: TurnTimerProps) {
   const [timeLeft, setTimeLeft] = useState(0);
   const [maxTime, setMaxTime] = useState(1);
   const initialDeadlineRef = useRef<number | null>(null);
@@ -14,6 +15,14 @@ export function TurnTimer({ deadline, className = '' }: TurnTimerProps) {
     if (!deadline) {
       setTimeLeft(0);
       initialDeadlineRef.current = null;
+      return;
+    }
+
+    if (paused) {
+      setTimeLeft(deadline); // deadline is the remaining ms duration when paused
+      if (maxTime <= 1) {
+        setMaxTime(20000);
+      }
       return;
     }
 
@@ -33,7 +42,7 @@ export function TurnTimer({ deadline, className = '' }: TurnTimerProps) {
     }, 50);
 
     return () => clearInterval(interval);
-  }, [deadline]);
+  }, [deadline, paused, maxTime]);
 
   if (!deadline || timeLeft === 0) {
     return null; // hide when not active or done

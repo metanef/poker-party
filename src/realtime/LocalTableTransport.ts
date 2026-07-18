@@ -251,6 +251,16 @@ export class LocalTableTransport implements ITableTransport {
     }
   }
 
+  private rescheduleBotActions(generation: number, remainingMs: number) {
+    if (!this.table || !this.deck) return;
+    for (const player of this.table.players) {
+      if (player.id === this.localPlayerId || !player.active || player.hasActedThisRound) continue;
+      const maxDelay = Math.max(1000, remainingMs - 1500);
+      const delay = 500 + Math.random() * maxDelay;
+      this.schedule(() => this.applyBotChoice(player.id, generation), delay);
+    }
+  }
+
   private applyBotChoice(playerId: string, generation: number) {
     if (generation !== this.exchangeGeneration) return; // round already ended
     if (!this.table || !this.deck) return;
@@ -351,7 +361,23 @@ export class LocalTableTransport implements ITableTransport {
 
   async sendPause(paused: boolean): Promise<void> {
     if (!this.table) return;
-    this.table = paused ? pauseTable(this.table) : resumeTable(this.table);
+    this.clearTimers();
+    if (paused) {
+      const remaining = this.table.exchangeDeadline
+        ? Math.max(0, this.table.exchangeDeadline - Date.now())
+        : null;
+      this.table = pauseTable(this.table);
+      this.table.exchangeDeadline = remaining;
+    } else {
+      const remaining = this.table.exchangeDeadline;
+      this.table = resumeTable(this.table);
+      this.table.exchangeDeadline = remaining ? Date.now() + remaining : null;
+      if (remaining) {
+        const generation = this.exchangeGeneration;
+        this.schedule(() => this.checkExchangeRoundCompletion(generation), remaining + 250);
+        this.rescheduleBotActions(generation, remaining);
+      }
+    }
     this.notifyTable();
   }
 

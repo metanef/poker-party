@@ -403,9 +403,27 @@ export class FirebaseTableTransport implements ITableTransport {
       }
       case 'pause': {
         const paused = data.paused as boolean;
-        this.hostTable = paused
-          ? pauseTable(this.hostTable)
-          : resumeTable(this.hostTable);
+        if (uid !== this.hostTable.hostId) break;
+
+        this.clearHostTimers();
+        if (paused) {
+          const remaining = this.hostTable.exchangeDeadline
+            ? Math.max(0, this.hostTable.exchangeDeadline - Date.now())
+            : null;
+          this.hostTable = pauseTable(this.hostTable);
+          this.hostTable.exchangeDeadline = remaining;
+        } else {
+          const remaining = this.hostTable.exchangeDeadline;
+          this.hostTable = resumeTable(this.hostTable);
+          this.hostTable.exchangeDeadline = remaining ? Date.now() + remaining : null;
+          if (remaining) {
+            this.scheduleHost(
+              () => this.hostFinishExchangeRound(),
+              remaining + 250,
+            );
+            this.triggerTemporaryBotActionsIfNeeded();
+          }
+        }
         void this.hostPublish(this.hostTable);
         break;
       }
@@ -930,9 +948,25 @@ export class FirebaseTableTransport implements ITableTransport {
 
   async sendPause(paused: boolean): Promise<void> {
     if (this.isHostClient && this.hostTable) {
-      this.hostTable = paused
-        ? pauseTable(this.hostTable)
-        : resumeTable(this.hostTable);
+      this.clearHostTimers();
+      if (paused) {
+        const remaining = this.hostTable.exchangeDeadline
+          ? Math.max(0, this.hostTable.exchangeDeadline - Date.now())
+          : null;
+        this.hostTable = pauseTable(this.hostTable);
+        this.hostTable.exchangeDeadline = remaining;
+      } else {
+        const remaining = this.hostTable.exchangeDeadline;
+        this.hostTable = resumeTable(this.hostTable);
+        this.hostTable.exchangeDeadline = remaining ? Date.now() + remaining : null;
+        if (remaining) {
+          this.scheduleHost(
+            () => this.hostFinishExchangeRound(),
+            remaining + 250,
+          );
+          this.triggerTemporaryBotActionsIfNeeded();
+        }
+      }
       await this.hostPublish(this.hostTable);
       return;
     }

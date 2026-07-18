@@ -455,7 +455,7 @@ export default function TablePage() {
           {/* Center Info / Timer */}
           <div className="h-16 flex items-center justify-center">
             {isExchange && table.exchangeDeadline ? (
-              <TurnTimer deadline={table.exchangeDeadline} />
+              <TurnTimer deadline={table.exchangeDeadline} paused={table.paused} />
             ) : table.paused ? (
               <div className="text-gray-500 flex items-center gap-2 font-title animate-pulse">
                 <PauseButton paused={true} isHost={false} className="w-8 h-8 pointer-events-none" />
@@ -536,14 +536,22 @@ export default function TablePage() {
 
       {/* Pause Overlay (Blocks interactions if paused and not showdown) */}
       {table.paused && !isShowdown && (
-        <div className="absolute inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center pointer-events-auto">
-           <div className="bg-table-panel p-6 rounded-panel border border-table-border text-center shadow-2xl">
+        <div className="absolute inset-0 z-[50] bg-black/50 backdrop-blur-sm flex items-center justify-center pointer-events-auto">
+           <div className="bg-table-panel p-6 rounded-panel border border-table-border text-center shadow-2xl flex flex-col items-center">
              <h2 className="font-title text-xl text-white mb-2">Jeu en pause</h2>
-             <p className="text-gray-400 text-sm">
+             <p className="text-gray-400 text-sm mb-4">
                {table.hostId === transport.localPlayerId 
-                 ? "Cliquez sur le bouton play en haut pour reprendre."
+                 ? "La partie est suspendue."
                  : "En attente de l'hôte pour reprendre la partie."}
              </p>
+             {table.hostId === transport.localPlayerId && (
+               <button
+                 onClick={() => transport.sendPause(false).catch(console.error)}
+                 className="bg-felt-accent text-table-bg font-title font-semibold px-6 py-2.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg cursor-pointer"
+               >
+                 Reprendre la partie
+               </button>
+             )}
            </div>
         </div>
       )}
