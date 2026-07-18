@@ -7,7 +7,7 @@
   **A modern real-time multiplayer card game with symbolic stripping stakes.**
 
   [![Live Demo](https://img.shields.io/badge/LIVE_DEMO-PLAY_ONLINE-22c55e?style=for-the-badge&logo=githubpages&logoColor=white)](https://metanef.github.io/poker-party/)
-  [![v1.0](https://img.shields.io/badge/VERSION-1.0_FINAL-8b5cf6?style=for-the-badge)](https://github.com/metanef/poker-party)
+  [![v1.1](https://img.shields.io/badge/VERSION-1.1_STABLE-8b5cf6?style=for-the-badge)](https://github.com/metanef/poker-party)
 
   <br />
 
