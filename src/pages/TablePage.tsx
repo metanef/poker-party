@@ -382,10 +382,10 @@ export default function TablePage() {
     <div className="min-h-[100dvh] bg-table-bg text-white overflow-hidden flex flex-row relative select-none animate-fadeIn">
       
       {/* Game Table (Left Side) */}
-      <div className="flex-1 flex flex-col h-[100dvh] relative overflow-hidden">
+      <div className="flex-1 flex flex-col h-[100dvh] relative overflow-y-auto scrollbar-hide">
         
         {/* Top Bar */}
-        <div className="pt-safe-game bg-black/20 border-b border-white/5 z-[60]">
+        <div className="pt-safe-game bg-black/20 border-b border-white/5 z-[60] flex-shrink-0">
           <div className="h-16 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <div className="font-mono text-sm tracking-widest text-gray-500 bg-black/40 px-3 py-1 rounded-md">
@@ -423,7 +423,7 @@ export default function TablePage() {
         </div>
 
       {/* Main Game Area */}
-      <div className="flex-1 relative flex flex-col items-center justify-between p-4">
+      <div className="flex-1 min-h-[400px] relative flex flex-col items-center justify-between p-4">
         
         {/* Felt / Table Center */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] h-[35vh] sm:w-[80vw] sm:h-[60vh] max-w-4xl border-2 border-white/5 rounded-full bg-white/[0.02] shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] pointer-events-none" />
@@ -491,7 +491,7 @@ export default function TablePage() {
       </div>
 
       {/* Local Player Area (Bottom) */}
-      <div className="w-full flex flex-col items-center pb-safe-game pt-4 bg-gradient-to-t from-black/80 to-transparent z-20 relative">
+      <div className="w-full flex-shrink-0 flex flex-col items-center pb-safe-game pt-4 bg-gradient-to-t from-black/80 to-transparent z-20 relative">
         
         {/* Emotes */}
         <div className="absolute -top-14 left-4 z-30">

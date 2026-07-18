@@ -29,8 +29,8 @@ export function ConsentModal({ onConsented }: ConsentModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-table-panel border border-table-border rounded-panel max-w-md w-full p-8 shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="bg-table-panel border border-table-border rounded-panel max-w-md w-full p-8 shadow-2xl flex flex-col my-auto">
         
         <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10 mb-6 mx-auto">
           <AlertTriangle className="w-8 h-8 text-red-400" />

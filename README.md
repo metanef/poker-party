@@ -86,3 +86,4 @@ Ouvrez `http://localhost:5173` dans votre navigateur.
 
 ### 🔄 À venir (Planned)
 - [ ] **Version Anglaise (i18n)** : Traduction bilingue Français / Anglais.
+- [ ] **Gérer l'écran de pause** : faire en sorte que le bouton pause ne reste pas bloqué en pause
