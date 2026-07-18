@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/engine/model/Card';
 import { PlayingCard } from './PlayingCard';
 import { getTransport } from '@/ui/hooks/useTableSocket';
+import { t } from '@/i18n/languageStore';
 
 interface ExchangeConsoleProps {
   cards: Card[];
@@ -46,6 +47,10 @@ export function ExchangeConsole({ cards, isExchangeActive, hasActed, className =
     }).catch(console.error);
   };
 
+  const changeCardsText = selectedIndices.size > 1
+    ? t('change_cards_btn_plural', { count: selectedIndices.size })
+    : t('change_cards_btn_singular', { count: selectedIndices.size });
+
   return (
     <div className={`flex flex-col items-center w-full max-w-2xl mx-auto ${className}`}>
       {/* Cards Row */}
@@ -78,7 +83,7 @@ export function ExchangeConsole({ cards, isExchangeActive, hasActed, className =
                 : 'bg-table-panel/50 text-gray-500 border border-table-border/40 cursor-not-allowed opacity-50'
             }`}
           >
-            Changer {selectedIndices.size > 0 ? selectedIndices.size : ''} carte{selectedIndices.size > 1 ? 's' : ''}
+            {changeCardsText}
           </button>
 
           {/* Garder tout button */}
@@ -91,7 +96,7 @@ export function ExchangeConsole({ cards, isExchangeActive, hasActed, className =
                 : 'bg-table-panel/50 text-gray-500 border border-table-border/40 cursor-not-allowed opacity-50'
             }`}
           >
-            Garder tout
+            {t('keep_all_btn')}
           </button>
         </div>
 
@@ -99,12 +104,12 @@ export function ExchangeConsole({ cards, isExchangeActive, hasActed, className =
         <div className="h-6 flex items-center justify-center">
           {hasActed && (
             <div className="text-xs text-gray-400 font-medium italic animate-pulse">
-              En attente des autres joueurs...
+              {t('waiting_players_status')}
             </div>
           )}
           {!isExchangeActive && !hasActed && (
             <div className="text-xs text-felt-accent font-medium italic animate-pulse">
-              Chargement de la manche...
+              {t('loading_round_status')}
             </div>
           )}
         </div>

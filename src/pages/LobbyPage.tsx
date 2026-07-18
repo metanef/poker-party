@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getTransport } from '@/ui/hooks/useTableSocket';
-import { useTableStore } from '@/store/tableStore';
-import { Link, useLocation } from 'wouter';
-import { Users, Copy, Check, Play, UserPlus } from 'lucide-react';
+import { useLocation } from 'wouter';
+import { Users, Play, UserPlus } from 'lucide-react';
+import { useLanguageStore, t } from '@/i18n/languageStore';
 
 const EMOJIS = ['🐶','🐱','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🦄','🦇','🦉'];
 
@@ -18,6 +18,9 @@ export default function LobbyPage() {
   
   const [openTables, setOpenTables] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const language = useLanguageStore((s) => s.language);
+  const setLanguage = useLanguageStore((s) => s.setLanguage);
 
   useEffect(() => {
     // Poll for open tables
@@ -73,12 +76,36 @@ export default function LobbyPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-300/20 blur-3xl" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-yellow-200/20 blur-3xl" />
       
+      {/* Language Switcher */}
+      <div className="absolute top-4 right-4 z-20 flex gap-1 bg-white/80 backdrop-blur-md p-1 rounded-full border border-gray-200/50 shadow-sm">
+        <button
+          onClick={() => setLanguage('fr')}
+          className={`px-3 py-1.5 rounded-full text-xs font-semibold font-title transition-all flex items-center gap-1.5 cursor-pointer ${
+            language === 'fr'
+              ? 'bg-teal-500 text-white shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+          }`}
+        >
+          FR
+        </button>
+        <button
+          onClick={() => setLanguage('en')}
+          className={`px-3 py-1.5 rounded-full text-xs font-semibold font-title transition-all flex items-center gap-1.5 cursor-pointer ${
+            language === 'en'
+              ? 'bg-teal-500 text-white shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
+          }`}
+        >
+          EN
+        </button>
+      </div>
+
       <div className="text-center mb-6 md:mb-10 z-10">
         <h1 className="font-title text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-2 md:mb-3">
-          Poker<span className="text-teal-500">Party</span>
+          {t('app_title_1')}<span className="text-teal-500">{t('app_title_2')}</span>
         </h1>
         <p className="text-gray-600 max-w-sm mx-auto font-medium text-sm md:text-base">
-          Le jeu de cartes entre amis où chaque vêtement compte.
+          {t('app_subtitle')}
         </p>
       </div>
 
@@ -89,30 +116,30 @@ export default function LobbyPage() {
           <div className="bg-table-panel text-white rounded-panel p-6 shadow-xl border border-table-border">
             <h2 className="font-title text-xl font-semibold mb-6 flex items-center gap-2">
               <UserPlus className="w-5 h-5 text-felt-accent" />
-              Votre profil
+              {t('profile_title')}
             </h2>
             
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Pseudo</label>
+                <label className="block text-sm font-medium text-gray-400 mb-2">{t('pseudo_label')}</label>
                 <input 
                   type="text"
                   value={pseudo}
                   onChange={(e) => setPseudo(e.target.value)}
-                  placeholder="Comment vous appelez-vous ?"
+                  placeholder={t('pseudo_placeholder')}
                   className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-felt-accent transition-all"
                   maxLength={15}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Avatar</label>
+                <label className="block text-sm font-medium text-gray-400 mb-2">{t('avatar_label')}</label>
                 <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                   {EMOJIS.map(em => (
                     <button
                       key={em}
                       onClick={() => setAvatar(em)}
-                      className={`text-2xl w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                      className={`text-2xl w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                         avatar === em 
                           ? 'bg-felt-accent shadow-[0_0_10px_rgba(61,217,196,0.4)] scale-110' 
                           : 'bg-black/30 hover:bg-black/50 hover:scale-105'
@@ -130,22 +157,22 @@ export default function LobbyPage() {
           <div className="bg-white/80 backdrop-blur-md rounded-panel p-6 shadow-xl border border-white/50 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-teal-400/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150" />
             
-            <h2 className="font-title text-xl font-semibold text-gray-900 mb-6">Créer une table</h2>
+            <h2 className="font-title text-xl font-semibold text-gray-900 mb-6">{t('create_table_title')}</h2>
             
             <form onSubmit={handleCreate} className="space-y-5 relative z-10">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Joueurs max</label>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('max_players_label')}</label>
                   <select 
                     value={maxPlayers}
                     onChange={(e) => setMaxPlayers(Number(e.target.value))}
                     className="w-full bg-white border border-gray-200 rounded-xl px-2 py-2.5 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-400"
                   >
-                    {[2, 3, 4].map(n => <option key={n} value={n}>{n} joueurs</option>)}
+                    {[2, 3, 4].map(n => <option key={n} value={n}>{n} {t('players_suffix')}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Vêtements</label>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('starting_clothing_label')}</label>
                   <select 
                     value={startingClothing}
                     onChange={(e) => setStartingClothing(Number(e.target.value))}
@@ -155,7 +182,7 @@ export default function LobbyPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5" title="Points requis pour racheter un vêtement">Points rachat</label>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5" title={t('buyback_cost_title')}>{t('buyback_cost_label')}</label>
                   <select 
                     value={buybackCost}
                     onChange={(e) => setBuybackCost(Number(e.target.value))}
@@ -169,10 +196,10 @@ export default function LobbyPage() {
               <button 
                 type="submit"
                 disabled={!pseudo.trim() || isLoading}
-                className="w-full bg-teal-500 text-white font-title font-semibold rounded-full py-3.5 shadow-md shadow-teal-500/20 hover:bg-teal-400 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-teal-500 text-white font-title font-semibold rounded-full py-3.5 shadow-md shadow-teal-500/20 hover:bg-teal-400 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Play className="w-5 h-5" />
-                Créer la partie
+                {t('create_game_btn')}
               </button>
             </form>
           </div>
@@ -182,23 +209,23 @@ export default function LobbyPage() {
         <div className="space-y-6 flex flex-col">
           {/* Join with Code */}
           <div className="bg-white/80 backdrop-blur-md rounded-panel p-6 shadow-xl border border-white/50">
-            <h2 className="font-title text-xl font-semibold text-gray-900 mb-6">Rejoindre via un code</h2>
+            <h2 className="font-title text-xl font-semibold text-gray-900 mb-6">{t('join_code_title')}</h2>
             
             <form onSubmit={handleJoin} className="flex flex-col sm:flex-row gap-3">
               <input 
                 type="text"
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                placeholder="Ex: ABCDEF"
+                placeholder={t('join_code_placeholder')}
                 className="w-full sm:flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 text-base font-mono text-center tracking-widest placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 uppercase"
                 maxLength={6}
               />
               <button 
                 type="submit"
                 disabled={!pseudo.trim() || joinCode.length < 3 || isLoading}
-                className="w-full sm:w-auto bg-gray-900 text-white font-title font-semibold rounded-xl py-3 px-6 hover:bg-gray-800 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto bg-gray-900 text-white font-title font-semibold rounded-xl py-3 px-6 hover:bg-gray-800 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                Rejoindre
+                {t('join_game_btn')}
               </button>
             </form>
           </div>
@@ -207,7 +234,7 @@ export default function LobbyPage() {
           <div className="bg-white/60 backdrop-blur-md rounded-panel p-6 shadow-lg border border-white/40 flex-1 flex flex-col">
             <h2 className="font-title text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Users className="w-5 h-5 text-gray-500" />
-              Tables en attente
+              {t('open_tables_title')}
             </h2>
             
             <div className="flex-1 overflow-y-auto min-h-[200px] space-y-3 pr-2 scrollbar-hide">
@@ -216,35 +243,35 @@ export default function LobbyPage() {
                   <div className="w-12 h-12 rounded-full bg-black/5 flex items-center justify-center mb-2">
                     <Users className="w-6 h-6 opacity-50" />
                   </div>
-                  <p className="text-sm">Aucune table ouverte.</p>
-                  <p className="text-xs">Créez la vôtre !</p>
+                  <p className="text-sm">{t('no_open_tables')}</p>
+                  <p className="text-xs">{t('create_yours_hint')}</p>
                 </div>
               ) : (
-                openTables.map(t => (
-                  <div key={t.code} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between hover:border-teal-300 transition-colors group">
+                openTables.map(tData => (
+                  <div key={tData.code} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between hover:border-teal-300 transition-colors group">
                     <div>
                       <div className="font-mono font-bold text-gray-900 tracking-wider bg-gray-100 px-2 py-1 rounded inline-block text-sm mb-1 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
-                        {t.code}
+                        {tData.code}
                       </div>
                       <div className="text-xs text-gray-500 font-medium flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full ${t.playersConnected === t.playersExpected ? 'bg-orange-400' : 'bg-green-400'}`}></span>
-                        {t.playersConnected} / {t.playersExpected} joueurs
+                        <span className={`w-2 h-2 rounded-full ${tData.playersConnected === tData.playersExpected ? 'bg-orange-400' : 'bg-green-400'}`}></span>
+                        {tData.playersConnected} / {tData.playersExpected} {t('players_suffix')}
                       </div>
                     </div>
                     
                     <button
                       onClick={() => {
-                        setJoinCode(t.code);
+                        setJoinCode(tData.code);
                         if (pseudo) {
-                          getTransport().joinTable({ code: t.code, pseudo, avatar })
-                            .then(() => setLocation(`/table/${t.code}`))
+                          getTransport().joinTable({ code: tData.code, pseudo, avatar })
+                            .then(() => setLocation(`/table/${tData.code}`))
                             .catch(console.error);
                         }
                       }}
-                      disabled={t.playersConnected >= t.playersExpected || !pseudo.trim()}
-                      className="text-sm font-semibold text-teal-600 bg-teal-50 hover:bg-teal-100 px-4 py-2 rounded-full transition-colors disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400"
+                      disabled={tData.playersConnected >= tData.playersExpected || !pseudo.trim()}
+                      className="text-sm font-semibold text-teal-600 bg-teal-50 hover:bg-teal-100 px-4 py-2 rounded-full transition-colors disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400 cursor-pointer"
                     >
-                      {t.playersConnected >= t.playersExpected ? 'Pleine' : 'Rejoindre'}
+                      {tData.playersConnected >= tData.playersExpected ? t('full_label') : t('join_game_btn')}
                     </button>
                   </div>
                 ))

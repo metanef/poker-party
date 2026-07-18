@@ -1,7 +1,8 @@
 import React from 'react';
-import { Card, rankLabel, suitSymbol, isRedSuit } from '@/engine/model/Card';
+import { Card, suitSymbol, isRedSuit } from '@/engine/model/Card';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useLanguageStore, getLocalizedRankLabel } from '@/i18n/languageStore';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -18,6 +19,7 @@ interface PlayingCardProps {
 export function PlayingCard({ card, selected, onClick, className, size = 'md' }: PlayingCardProps) {
   const isFaceUp = Boolean(card);
   const isRed = card ? isRedSuit(card.suit) : false;
+  const language = useLanguageStore((s) => s.language);
 
   const sizeClasses = {
     sm: 'w-9 h-13 sm:w-12 sm:h-16 text-[10px] sm:text-xs',
@@ -54,7 +56,7 @@ export function PlayingCard({ card, selected, onClick, className, size = 'md' }:
               isRed ? 'text-red-500' : 'text-gray-900'
             )}
           >
-            {rankLabel(card!.rank)}
+            {getLocalizedRankLabel(card!.rank, language)}
           </div>
           <div
             className={cn(

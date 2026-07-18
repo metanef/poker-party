@@ -3,6 +3,7 @@ import { HandResult } from '@/engine/model/Table';
 import { Player } from '@/engine/model/Player';
 import { Trophy, AlertTriangle, ArrowRight, RefreshCw, Check, Clock } from 'lucide-react';
 import { PlayingCard } from './PlayingCard';
+import { useLanguageStore, t, translateHandLabelFrToEn } from '@/i18n/languageStore';
 
 export function BurningClothingAnimation({ className = '' }: { className?: string }) {
   const sparks = React.useMemo(() => {
@@ -126,6 +127,8 @@ export function HandResultBanner({
   const localPlayer = players.find(p => p.id === localPlayerId);
   const isReady = localPlayer?.ready ?? false;
 
+  const language = useLanguageStore((s) => s.language);
+
   const otherActivePlayers = players.filter(p => p.id !== hostId && p.active);
   const readyOtherCount = otherActivePlayers.filter(p => p.ready).length;
   const allOthersReady = otherActivePlayers.every(p => p.ready);
@@ -148,28 +151,40 @@ export function HandResultBanner({
           <div className="bg-gradient-to-br from-red-950/60 via-red-900/40 to-orange-950/60 border border-red-500/40 rounded-xl p-4 w-full flex items-center justify-between relative overflow-hidden animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.25)]">
             <BurningClothingAnimation className="z-20 shrink-0" />
             <div className="flex flex-col text-center z-20">
-              <h3 className="font-title font-black text-red-400 text-lg tracking-wide uppercase drop-shadow">Vous êtes nu !</h3>
-              <p className="text-xs text-orange-300 mt-1 font-semibold">Tous vos vêtements ont brûlé !</p>
+              <h3 className="font-title font-black text-red-400 text-lg tracking-wide uppercase drop-shadow">
+                {language === 'en' ? "You are naked!" : "Vous êtes nu !"}
+              </h3>
+              <p className="text-xs text-orange-300 mt-1 font-semibold">
+                {language === 'en' ? "All your clothes burned!" : "Tous vos vêtements ont brûlé !"}
+              </p>
             </div>
             <BurningClothingAnimation className="z-20 shrink-0" />
           </div>
         ) : isLoser ? (
           <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 w-full flex flex-col items-center">
             <AlertTriangle className="w-8 h-8 text-red-400 mb-2" />
-            <h3 className="font-title font-semibold text-red-400 text-lg">Vous avez perdu !</h3>
-            <p className="text-sm text-red-300 mt-1">Retirez un vêtement.</p>
+            <h3 className="font-title font-semibold text-red-400 text-lg">
+              {language === 'en' ? "You lost!" : "Vous avez perdu !"}
+            </h3>
+            <p className="text-sm text-red-300 mt-1">
+              {language === 'en' ? "Remove a clothing item." : "Retirez un vêtement."}
+            </p>
           </div>
         ) : result.winnerIds.includes(localPlayerId) ? (
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 w-full flex flex-col items-center">
             <Trophy className="w-8 h-8 text-amber-400 mb-2" />
-            <h3 className="font-title font-semibold text-amber-400 text-lg">Vous avez gagné !</h3>
+            <h3 className="font-title font-semibold text-amber-400 text-lg">
+              {language === 'en' ? "You won!" : "Vous avez gagné !"}
+            </h3>
             <p className="text-sm text-amber-300 mt-1">+1 point</p>
           </div>
         ) : (
           <div className="flex flex-col items-center">
             <Trophy className="w-8 h-8 text-rank-gold mb-2" />
             <h3 className="font-title font-semibold text-white text-lg">
-              {result.tiedForWin ? 'Égalité pour la gagne !' : `Gagnant : ${winnerNames}`}
+              {result.tiedForWin 
+                ? (language === 'en' ? 'Tie for the win!' : 'Égalité pour la gagne !') 
+                : (language === 'en' ? `Winner: ${winnerNames}` : `Gagnant : ${winnerNames}`)}
             </h3>
             <p className="text-sm text-gray-400">
               +1 point
@@ -184,9 +199,9 @@ export function HandResultBanner({
       {/* Révélation des mains Section */}
       <div className="w-full flex flex-col gap-3 text-left">
         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest text-center">
-          🔍 Révélation des mains
+          {language === 'en' ? "🔍 Hand Reveal" : "🔍 Révélation des mains"}
         </h4>
-        <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-64 overflow-y-auto pr-1 flex flex-col">
           {Object.entries(result.handLabels).map(([playerId, handLabel]) => {
             const player = players.find(p => p.id === playerId);
             if (!player) return null;
@@ -196,6 +211,8 @@ export function HandResultBanner({
             const hasLost = result.loserIds.includes(playerId);
             const isNude = player.clothingRemaining === 0;
             
+            const displayHandLabel = language === 'en' ? translateHandLabelFrToEn(handLabel) : handLabel;
+
             return (
               <div 
                 key={playerId} 
@@ -209,25 +226,25 @@ export function HandResultBanner({
                   <div className="flex items-center gap-1.5">
                     <span className="text-base">{player.avatar}</span>
                     <span className={`text-xs font-semibold ${isLocal ? 'text-felt-accent' : 'text-white'} truncate max-w-[120px]`}>
-                      {player.pseudo} {isLocal && '(Vous)'}
+                      {player.pseudo} {isLocal && t('you_suffix')}
                     </span>
                     {isNude && (
                       <span className="text-[9px] bg-red-600/90 text-white font-title px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold animate-pulse flex items-center gap-0.5">
-                        🔥 NU
+                        {language === 'en' ? '🔥 NAKED' : '🔥 NU'}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-1">
                     {hasWon && (
                       <span className="text-[9px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded-full border border-amber-500/20 font-bold uppercase tracking-wider">
-                        Gagne (+1)
+                        {language === 'en' ? 'Wins (+1)' : 'Gagne (+1)'}
                       </span>
                     )}
                     {hasLost && (
                       <div className="flex items-center gap-0.5">
                         {isNude && <BurningClothingAnimation className="scale-75 -my-3 -mx-2" />}
                         <span className="text-[9px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded-full border border-red-500/20 font-bold uppercase tracking-wider">
-                          Perd (-1 👕)
+                          {language === 'en' ? 'Loses (-1 👕)' : 'Perd (-1 👕)'}
                         </span>
                       </div>
                     )}
@@ -235,23 +252,25 @@ export function HandResultBanner({
                 </div>
 
                 <div className="flex items-center gap-3 z-20">
-                    {/* Cards */}
-                    <div className="flex -space-x-2.5">
-                      {player.holeCards && player.holeCards.map((c, i) => (
-                        <PlayingCard key={i} card={c} size="sm" className="shadow-md cursor-default pointer-events-none" />
-                      ))}
-                    </div>
-                    {/* Hand description */}
-                    <div className="flex flex-col">
-                      <span className="text-[9px] text-gray-500 uppercase tracking-wider font-semibold">Main</span>
-                      <span className="text-xs font-bold text-gray-200">{handLabel}</span>
-                    </div>
+                  {/* Cards */}
+                  <div className="flex -space-x-2.5">
+                    {player.holeCards && player.holeCards.map((c, i) => (
+                      <PlayingCard key={i} card={c} size="sm" className="shadow-md cursor-default pointer-events-none" />
+                    ))}
+                  </div>
+                  {/* Hand description */}
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-gray-500 uppercase tracking-wider font-semibold">
+                      {language === 'en' ? 'Hand' : 'Main'}
+                    </span>
+                    <span className="text-xs font-bold text-gray-200">{displayHandLabel}</span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
+      </div>
 
       <div className="w-full h-px bg-table-border" />
 
@@ -262,34 +281,38 @@ export function HandResultBanner({
         }`}
       >
         <h4 className="text-xs font-bold text-amber-400 uppercase tracking-widest flex items-center gap-1">
-          🛍️ Marché de rachat
+          {language === 'en' ? "🛍️ Buyback Market" : "🛍️ Marché de rachat"}
         </h4>
         <p className="text-[10px] text-gray-400">
-          Récupérer 1 vêtement.
+          {language === 'en' ? "Get back 1 clothing item." : "Récupérer 1 vêtement."}
         </p>
         
         {localPlayerPoints < buybackCost ? (
           <button
             disabled
-            className="w-full bg-white/5 text-gray-400 border border-white/10 font-title text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1 cursor-not-allowed"
+            className="w-full bg-white/5 text-gray-400 border border-white/10 font-title text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1 cursor-not-allowed animate-none"
           >
-            Points insuffisants ({localPlayerPoints}/{buybackCost} pts)
+            {language === 'en' 
+              ? `Insufficient points (${localPlayerPoints}/${buybackCost} pts)` 
+              : `Points insuffisants (${localPlayerPoints}/${buybackCost} pts)`}
           </button>
         ) : (
           <button
             onClick={onRestoreClothing}
-            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-table-bg font-title font-bold text-xs py-2 px-3 rounded-lg transition-all active:scale-95 shadow-md flex items-center justify-center gap-1.5 hover:shadow-amber-500/10"
+            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-table-bg font-title font-bold text-xs py-2 px-3 rounded-lg transition-all active:scale-95 shadow-md flex items-center justify-center gap-1.5 hover:shadow-amber-500/10 cursor-pointer"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Racheter 1 vêtement (-{buybackCost} pts)
+            <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" />
+            {language === 'en' 
+              ? `Buy back 1 clothing item (-${buybackCost} pts)` 
+              : `Racheter 1 vêtement (-${buybackCost} pts)`}
           </button>
         )}
       </div>
 
       {/* Ready Status Section */}
-      <div className="w-full bg-black/20 border border-white/5 rounded-xl p-3 flex flex-col gap-2">
+      <div className="w-full bg-black/20 border border-white/5 rounded-xl p-3 flex flex-col gap-2 animate-none">
         <div className="flex items-center justify-between text-xs font-bold text-gray-400">
-          <span>Prêts pour la suite :</span>
+          <span>{language === 'en' ? "Ready for next round:" : "Prêts pour la suite :"}</span>
           <span>{readyOtherCount} / {otherActivePlayers.length}</span>
         </div>
         <div className="flex flex-wrap gap-1.5 justify-center">
@@ -326,14 +349,16 @@ export function HandResultBanner({
           <button
             onClick={onNextHand}
             disabled={!allOthersReady}
-            className={`w-full font-title font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 ${
+            className={`w-full font-title font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer ${
               allOthersReady
-                ? 'bg-emerald-500 hover:bg-emerald-400 text-white active:scale-95 hover:shadow-emerald-500/25 cursor-pointer'
+                ? 'bg-emerald-500 hover:bg-emerald-400 text-white active:scale-95 hover:shadow-emerald-500/25'
                 : 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700/50'
             }`}
           >
-            {allOthersReady ? 'Lancer la manche suivante' : 'En attente des autres joueurs...'}
-            <ArrowRight className="w-4 h-4" />
+            {allOthersReady 
+              ? (language === 'en' ? 'Start next round' : 'Lancer la manche suivante') 
+              : t('waiting_players_status')}
+            <ArrowRight className="w-4 h-4 animate-pulse" />
           </button>
         ) : (
           <div className="flex flex-col gap-2 w-full">
@@ -345,10 +370,14 @@ export function HandResultBanner({
                   : 'bg-indigo-600 hover:bg-indigo-500 border-indigo-500/20 text-white'
               }`}
             >
-              {isReady ? '✓ Prêt pour la suite' : 'Se marquer comme Prêt'}
+              {isReady 
+                ? (language === 'en' ? '✓ Ready for next' : '✓ Prêt pour la suite') 
+                : (language === 'en' ? 'Mark as Ready' : 'Se marquer comme Prêt')}
             </button>
-            <div className="text-[10px] text-gray-500 italic py-1 text-center animate-pulse">
-              En attente de l'hôte pour lancer la manche...
+            <div className="text-[10px] text-gray-500 italic py-1 text-center animate-pulse animate-duration-1000">
+              {language === 'en' 
+                ? "Waiting for host to start round..." 
+                : "En attente de l'hôte pour lancer la manche..."}
             </div>
           </div>
         )}

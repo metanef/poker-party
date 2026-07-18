@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { getTransport } from '@/ui/hooks/useTableSocket';
 import { AlertTriangle, ShieldCheck } from 'lucide-react';
+import { t } from '@/i18n/languageStore';
 
 interface ConsentModalProps {
   onConsented: () => void;
@@ -37,17 +38,17 @@ export function ConsentModal({ onConsented }: ConsentModalProps) {
         </div>
         
         <h2 className="font-title text-2xl font-bold text-white text-center mb-4">
-          Avertissement
+          {t('consent_warning_title')}
         </h2>
         
         <div className="space-y-4 text-gray-300 text-sm leading-relaxed mb-8">
           <p>
-            Ce jeu est destiné <strong>exclusivement à des adultes consentants</strong>. L'enjeu des manches est un compteur textuel représentant des vêtements.
+            {t('consent_body_1')}
           </p>
           <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Aucune image ou vidéo</strong> n'est demandée, prise, ou affichée. L'enjeu est purement textuel.</li>
-            <li>Vous devez être majeur(e) pour participer.</li>
-            <li>Vous pouvez mettre le jeu en pause ou quitter la table à tout moment.</li>
+            <li>{t('consent_item_1')}</li>
+            <li>{t('consent_item_2')}</li>
+            <li>{t('consent_item_3')}</li>
           </ul>
         </div>
         
@@ -61,7 +62,7 @@ export function ConsentModal({ onConsented }: ConsentModalProps) {
             />
           </div>
           <span className="text-sm font-medium text-white">
-            Je certifie être majeur(e) et je consens librement à participer à cette partie.
+            {t('consent_checkbox')}
           </span>
         </label>
         
@@ -69,21 +70,21 @@ export function ConsentModal({ onConsented }: ConsentModalProps) {
           <button
             onClick={handleConsent}
             disabled={!isChecked || isSubmitting}
-            className={`w-full py-3.5 rounded-full font-title font-semibold flex items-center justify-center gap-2 transition-all ${
+            className={`w-full py-3.5 rounded-full font-title font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               isChecked 
                 ? 'bg-felt-accent text-table-bg hover:brightness-110 active:scale-[0.98] shadow-lg shadow-felt-accent/20' 
                 : 'bg-white/10 text-gray-500 cursor-not-allowed'
             }`}
           >
             <ShieldCheck className="w-5 h-5" />
-            {isSubmitting ? 'Validation...' : 'J\'accepte et je rejoins'}
+            {isSubmitting ? t('consent_accept_submitting') : t('consent_accept_btn')}
           </button>
           
           <button
             onClick={handleLeave}
-            className="w-full py-3 rounded-full font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="w-full py-3 rounded-full font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
           >
-            Quitter
+            {t('consent_decline_btn')}
           </button>
         </div>
         

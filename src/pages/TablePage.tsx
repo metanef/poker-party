@@ -12,7 +12,8 @@ import { PauseButton } from '@/ui/components/PauseButton';
 import { HandResultBanner, BurningClothingAnimation } from '@/ui/components/HandResultBanner';
 import { PlayingCard } from '@/ui/components/PlayingCard';
 import { SidebarChat } from '@/ui/components/SidebarChat';
-import { LogOut, Home, UserPlus, AlertCircle, MessageSquare, Trophy, RefreshCw, Crown } from 'lucide-react';
+import { LogOut, Home, UserPlus, MessageSquare, Trophy, RefreshCw, Crown } from 'lucide-react';
+import { useLanguageStore, t } from '@/i18n/languageStore';
 
 export default function TablePage() {
   const { code } = useParams<{ code: string }>();
@@ -21,6 +22,7 @@ export default function TablePage() {
   
   const table = useTableStore(s => s.table);
   const privateHand = useTableStore(s => s.privateHand);
+  const language = useLanguageStore((s) => s.language);
   
   // Local state for join form when arriving directly via URL
   const [needsToJoin, setNeedsToJoin] = useState(false);
@@ -149,12 +151,24 @@ export default function TablePage() {
     }
   };
 
+  const getStageLabel = (stage: string) => {
+    switch (stage) {
+      case 'lobby': return language === 'en' ? 'Lobby' : 'Salle d\'attente';
+      case 'distribution': return language === 'en' ? 'Dealing' : 'Distribution';
+      case 'echange1': return language === 'en' ? 'Exchange 1' : 'Échange 1';
+      case 'echange2': return language === 'en' ? 'Exchange 2' : 'Échange 2';
+      case 'echange3': return language === 'en' ? 'Exchange 3' : 'Échange 3';
+      case 'showdown': return language === 'en' ? 'Showdown' : 'Dévoilement';
+      default: return stage;
+    }
+  };
+
   // 1. Loading state
   if (!table && !needsToJoin) {
     return (
       <div className="min-h-[100dvh] bg-table-bg flex items-center justify-center">
         <div className="text-felt-accent animate-pulse font-title">
-          {isCheckingReconnect ? 'Reconnexion en cours...' : 'Connexion à la table...'}
+          {isCheckingReconnect ? t('reconnecting_msg') : t('connecting_table_msg')}
         </div>
       </div>
     );
@@ -168,16 +182,18 @@ export default function TablePage() {
           <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4 text-teal-600">
             <UserPlus className="w-8 h-8" />
           </div>
-          <h1 className="font-title text-2xl font-bold text-center mb-2">Rejoindre la table</h1>
+          <h1 className="font-title text-2xl font-bold text-center mb-2">{t('rejoin_table_title')}</h1>
           <p className="text-center text-gray-500 mb-6 font-mono bg-gray-100 py-1 rounded inline-block w-full">Code : {code}</p>
           
           <form onSubmit={handleJoin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Pseudo</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {language === 'en' ? 'Nickname' : 'Pseudo'}
+              </label>
               <input 
                 type="text" value={pseudo} onChange={(e) => setPseudo(e.target.value)}
                 className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-teal-500 outline-none"
-                placeholder="Votre pseudo" required
+                placeholder={language === 'en' ? 'Your nickname' : 'Votre pseudo'} required
               />
             </div>
             <div>
@@ -185,7 +201,7 @@ export default function TablePage() {
               <div className="flex justify-between">
                 {['👻','🤠','👽','🤖','🤡'].map(em => (
                   <button type="button" key={em} onClick={() => setAvatar(em)}
-                    className={`text-2xl w-12 h-12 rounded-full ${avatar === em ? 'bg-teal-100 ring-2 ring-teal-500' : 'bg-gray-50 hover:bg-gray-100'}`}
+                    className={`text-2xl w-12 h-12 rounded-full cursor-pointer ${avatar === em ? 'bg-teal-100 ring-2 ring-teal-500' : 'bg-gray-50 hover:bg-gray-100'}`}
                   >
                     {em}
                   </button>
@@ -193,14 +209,14 @@ export default function TablePage() {
               </div>
             </div>
             <button type="submit" disabled={isJoining || !pseudo}
-              className="w-full bg-gray-900 text-white font-title font-semibold rounded-xl py-3 mt-4 hover:bg-gray-800 disabled:opacity-50"
+              className="w-full bg-gray-900 text-white font-title font-semibold rounded-xl py-3 mt-4 hover:bg-gray-800 disabled:opacity-50 cursor-pointer"
             >
-              {isJoining ? 'Connexion...' : 'Rejoindre'}
+              {isJoining ? (language === 'en' ? 'Connecting...' : 'Connexion...') : (language === 'en' ? 'Join' : 'Rejoindre')}
             </button>
             <button type="button" onClick={() => setLocation('/')}
-              className="w-full text-sm text-gray-500 py-2 hover:text-gray-900 flex justify-center items-center gap-1"
+              className="w-full text-sm text-gray-500 py-2 hover:text-gray-900 flex justify-center items-center gap-1 cursor-pointer"
             >
-              <Home className="w-4 h-4" /> Retour à l'accueil
+              <Home className="w-4 h-4" /> {t('back_to_home_btn')}
             </button>
           </form>
         </div>
@@ -256,10 +272,10 @@ export default function TablePage() {
               </div>
             )}
             <h2 className="font-title text-3xl font-extrabold text-white tracking-tight">
-              Partie Terminée
+              {t('game_over_title')}
             </h2>
             <p className="text-gray-400 text-xs mt-1 uppercase tracking-widest font-semibold">
-              Classement Final
+              {t('final_standings_title')}
             </p>
           </div>
 
@@ -268,11 +284,13 @@ export default function TablePage() {
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center">
               <p className="text-sm text-red-400 font-medium leading-relaxed">
                 {localNaked ? (
-                  "🔞 Vous finissez COMPLÈTEMENT NU !"
+                  language === 'en' ? "🔞 You end up COMPLETELY NAKED!" : "🔞 Vous finissez COMPLÈTEMENT NU !"
                 ) : (
                   <>
                     🔞 <span className="font-bold">{nakedPlayers.map(p => p.pseudo).join(', ')}</span>{' '}
-                    {nakedPlayers.length > 1 ? " finissent COMPLÈTEMENT NUS !" : "finit COMPLÈTEMENT NU !"}
+                    {nakedPlayers.length > 1 
+                      ? (language === 'en' ? " end up COMPLETELY NAKED!" : " finissent COMPLÈTEMENT NUS !") 
+                      : (language === 'en' ? " ends up COMPLETELY NAKED!" : " finit COMPLÈTEMENT NU !")}
                   </>
                 )}
               </p>
@@ -287,7 +305,7 @@ export default function TablePage() {
               const isPlayerHost = player.id === table.hostId;
 
               // Placement symbols
-              let rankSymbol = `${index + 1}e`;
+              let rankSymbol = language === 'en' ? `${index + 1}th` : `${index + 1}e`;
               let rankColor = 'text-gray-400';
               if (index === 0) {
                 rankSymbol = '🥇';
@@ -316,21 +334,23 @@ export default function TablePage() {
                     <span className="text-xl">{player.avatar}</span>
                     <div className="flex flex-col">
                       <span className={`text-sm font-semibold flex items-center gap-1.5 ${isPlayerLocal ? 'text-felt-accent' : 'text-white'}`}>
-                        {player.pseudo} {isPlayerLocal && '(Vous)'}
+                        {player.pseudo} {isPlayerLocal && t('you_suffix')}
                         {isPlayerHost && <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20 animate-pulse" />}
                       </span>
                       <span className="text-[10px] text-gray-500">
-                        {isNaked ? '🔞 Éliminé (Nu)' : `👕 ${player.clothingRemaining} vêtements restants`}
+                        {isNaked 
+                          ? (language === 'en' ? '🔞 Eliminated (Naked)' : '🔞 Éliminé (Nu)') 
+                          : `👕 ${player.clothingRemaining} ${player.clothingRemaining > 1 ? t('clothing_remaining_plural') : t('clothing_remaining_singular')}`}
                       </span>
                     </div>
                   </div>
 
                   <div className="text-right">
                     <span className="text-sm font-bold text-white block">
-                      {player.points} {player.points > 1 ? 'manches' : 'manche'}
+                      {player.points}
                     </span>
                     <span className="text-[9px] text-gray-400 uppercase tracking-wider font-medium font-title">
-                      gagnée{player.points > 1 && 's'}
+                      {player.points > 1 ? t('points_won_plural') : t('points_won_singular')}
                     </span>
                   </div>
                 </div>
@@ -345,10 +365,10 @@ export default function TablePage() {
                 transport.leaveTable().catch(console.error);
                 setLocation('/');
               }}
-              className="flex-1 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-title font-semibold py-3 px-6 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+              className="flex-1 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-title font-semibold py-3 px-6 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
-              Quitter la partie
+              {t('leave_table_btn')}
             </button>
 
             {isHost ? (
@@ -356,14 +376,14 @@ export default function TablePage() {
                 onClick={() => {
                   transport.restartGame().catch(console.error);
                 }}
-                className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-table-bg font-title font-bold py-3 px-6 rounded-xl transition-all active:scale-95 shadow-lg shadow-amber-500/10 flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-table-bg font-title font-bold py-3 px-6 rounded-xl transition-all active:scale-95 shadow-lg shadow-amber-500/10 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />
-                Relancer une partie
+                {t('restart_game_btn')}
               </button>
             ) : (
               <div className="flex-1 bg-white/5 border border-dashed border-white/10 text-gray-400 text-xs py-3 px-6 rounded-xl flex items-center justify-center">
-                En attente de l'hôte pour relancer...
+                {language === 'en' ? "Waiting for host to restart..." : "En attente de l'hôte pour relancer..."}
               </div>
             )}
           </div>
@@ -392,15 +412,15 @@ export default function TablePage() {
               {table.code}
             </div>
             <div className="text-sm font-medium text-gray-400 capitalize">
-              {table.stage}
+              {getStageLabel(table.stage)}
             </div>
           </div>
           
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-table-panel border border-table-border text-gray-300 hover:text-white hover:bg-white/5 transition-colors relative active:scale-95 duration-200"
-              title="Chat & Historique"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-table-panel border border-table-border text-gray-300 hover:text-white hover:bg-white/5 transition-colors relative active:scale-95 duration-200 cursor-pointer"
+              title={t('chat_btn_tooltip')}
             >
               <MessageSquare className="w-4 h-4" />
               {unreadCount > 0 && (
@@ -412,9 +432,12 @@ export default function TablePage() {
 
             <PauseButton paused={table.paused} isHost={table.hostId === transport.localPlayerId} />
             <button 
-              onClick={() => { if(confirm('Quitter la partie ?')) { transport.leaveTable(); setLocation('/'); } }}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-table-panel border border-table-border text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-colors active:scale-95 duration-200"
-              title="Quitter"
+              onClick={() => {
+                const confirmLeave = language === 'en' ? 'Leave the game?' : 'Quitter la partie ?';
+                if(confirm(confirmLeave)) { transport.leaveTable(); setLocation('/'); }
+              }}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-table-panel border border-table-border text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-colors active:scale-95 duration-200 cursor-pointer"
+              title={t('leave_btn')}
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -440,7 +463,7 @@ export default function TablePage() {
         </div>
 
         {/* Center Table Area (Community Cards & Pot/Timer) */}
-        <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-8 my-auto scale-90 sm:scale-100">
+        <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-8 my-auto scale-90 sm:scale-100 animate-none">
           {/* Community Cards */}
           <div className="flex items-center gap-1.5 sm:gap-2 h-28 sm:h-36">
             {table.communityCards.map((card, i) => (
@@ -459,11 +482,11 @@ export default function TablePage() {
             ) : table.paused ? (
               <div className="text-gray-500 flex items-center gap-2 font-title animate-pulse">
                 <PauseButton paused={true} isHost={false} className="w-8 h-8 pointer-events-none" />
-                En pause
+                {t('in_pause_label')}
               </div>
             ) : (
               <div className="text-gray-600 font-title text-sm uppercase tracking-widest">
-                Manche {table.handNumber}
+                {t('round_label')} {table.handNumber}
               </div>
             )}
           </div>
@@ -503,14 +526,16 @@ export default function TablePage() {
            <div className="text-right flex flex-col items-end gap-0.5 md:gap-1">
              <span className="text-white font-medium text-xs md:text-sm">{localPlayer.pseudo}</span>
              <span className="text-rank-gold font-bold text-sm md:text-lg">{localPlayer.points} pts</span>
-             <span className="text-[10px] md:text-xs text-gray-400">👕 {localPlayer.clothingRemaining} restant{localPlayer.clothingRemaining > 1 ? 's' : ''}</span>
+             <span className="text-[10px] md:text-xs text-gray-400">
+               👕 {localPlayer.clothingRemaining} {localPlayer.clothingRemaining > 1 ? t('clothing_remaining_plural') : t('clothing_remaining_singular')}
+             </span>
              {localPlayer.points >= (table.buybackCost ?? 3) && (
                <button
                  onClick={() => transport.sendRestoreClothing().catch(console.error)}
-                 className="text-[10px] md:text-xs bg-felt-accent text-table-bg font-title font-semibold px-2 md:px-3 py-1 md:py-1.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg whitespace-nowrap"
-                 title={`Remettre un vêtement (coût : ${table.buybackCost ?? 3} pts)`}
+                 className="text-[10px] md:text-xs bg-felt-accent text-table-bg font-title font-semibold px-2 md:px-3 py-1 md:py-1.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg whitespace-nowrap cursor-pointer"
+                 title={t('recover_clothing_title', { cost: table.buybackCost ?? 3 })}
                >
-                 Récupérer un vêtement
+                 {t('recover_clothing_btn')}
                </button>
              )}
            </div>
@@ -528,7 +553,7 @@ export default function TablePage() {
            />
         ) : (
           <div className="h-32 sm:h-48 flex items-center justify-center text-gray-500 font-title italic mb-4 sm:mb-6">
-            Vous avez passé ce tour
+            {t('passed_turn_msg')}
           </div>
         )}
 
@@ -537,18 +562,18 @@ export default function TablePage() {
       {/* Pause Overlay (Blocks interactions if paused and not showdown) */}
       {table.paused && !isShowdown && (
         <div className="absolute inset-0 z-[50] bg-black/50 backdrop-blur-sm flex items-center justify-center pointer-events-auto">
-           <div className="bg-table-panel p-6 rounded-panel border border-table-border text-center shadow-2xl flex flex-col items-center">
-             <h2 className="font-title text-xl text-white mb-2">Jeu en pause</h2>
-             <p className="text-gray-400 text-sm mb-4">
-               La partie est suspendue.
-             </p>
-             <button
-               onClick={() => transport.sendPause(false).catch(console.error)}
-               className="bg-felt-accent text-table-bg font-title font-semibold px-6 py-2.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg cursor-pointer"
-             >
-               Reprendre la partie
-             </button>
-           </div>
+            <div className="bg-table-panel p-6 rounded-panel border border-table-border text-center shadow-2xl flex flex-col items-center">
+              <h2 className="font-title text-xl text-white mb-2">{t('pause_overlay_title')}</h2>
+              <p className="text-gray-400 text-sm mb-4">
+                {t('pause_overlay_text')}
+              </p>
+              <button
+                onClick={() => transport.sendPause(false).catch(console.error)}
+                className="bg-felt-accent text-table-bg font-title font-semibold px-6 py-2.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg cursor-pointer"
+              >
+                {t('resume_game_btn')}
+              </button>
+            </div>
         </div>
       )}
 
@@ -557,10 +582,10 @@ export default function TablePage() {
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 pointer-events-none animate-backdrop">
           <div className="bg-gradient-to-r from-felt-accent/10 via-black/85 to-felt-accent/10 border-y border-felt-accent/20 w-full py-8 text-center shadow-2xl backdrop-blur-md transform animate-banner">
             <span className="text-felt-accent font-mono tracking-widest text-xs uppercase block mb-1">
-              🃏 Distribution des cartes en cours
+              {language === 'en' ? "🃏 Dealing cards..." : "🃏 Distribution des cartes en cours"}
             </span>
             <h2 className="font-title text-3xl md:text-5xl font-black text-white tracking-wide uppercase drop-shadow-[0_2px_10px_rgba(61,217,196,0.3)]">
-              Début de la Manche {table.handNumber}
+              {language === 'en' ? `Start of Round ${table.handNumber}` : `Début de la Manche ${table.handNumber}`}
             </h2>
           </div>
         </div>

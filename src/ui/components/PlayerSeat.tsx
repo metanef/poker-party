@@ -3,6 +3,7 @@ import { Player } from '@/engine/model/Player';
 import { useTableStore } from '@/store/tableStore';
 import { PlayingCard } from './PlayingCard';
 import { Check } from 'lucide-react';
+import { useLanguageStore, t } from '@/i18n/languageStore';
 
 interface PlayerSeatProps {
   player: Player;
@@ -16,6 +17,7 @@ export function PlayerSeat({ player, isLocal, isActiveTurn, isWaiting, className
   const emotes = useTableStore(s => s.emotes);
   const activeEmotes = emotes.filter(e => e.playerId === player.id);
   const [currentEmote, setCurrentEmote] = useState<string | null>(null);
+  const language = useLanguageStore((s) => s.language);
 
   useEffect(() => {
     if (activeEmotes.length > 0) {
@@ -49,8 +51,8 @@ export function PlayerSeat({ player, isLocal, isActiveTurn, isWaiting, className
         <div
           className={
             player.holeCards && player.holeCards.length > 0
-              ? "flex -space-x-3 mb-2 scale-110 sm:scale-125 origin-bottom opacity-100 z-30 transition-all duration-300"
-              : "flex -space-x-2.5 mb-2 scale-85 sm:scale-100 origin-bottom opacity-90 z-20 transition-all duration-300"
+              ? "flex -space-x-3 mb-2 scale-110 sm:scale-125 origin-bottom opacity-100 z-30 transition-all duration-300 animate-none"
+              : "flex -space-x-2.5 mb-2 scale-85 sm:scale-100 origin-bottom opacity-90 z-20 transition-all duration-300 animate-none"
           }
         >
            {player.holeCards && player.holeCards.length > 0 ? (
@@ -80,7 +82,7 @@ export function PlayerSeat({ player, isLocal, isActiveTurn, isWaiting, className
         {!player.connected && (
           <div 
             className="absolute -top-1 -left-1 bg-rose-600 text-white rounded-full px-1.5 py-0.5 shadow-md border border-rose-500 flex items-center justify-center pointer-events-none" 
-            title="Déconnecté (IA temporaire)"
+            title={language === 'en' ? "Disconnected (Temporary AI)" : "Déconnecté (IA temporaire)"}
           >
             <span className="text-[7px] font-bold uppercase tracking-wider scale-90">OFF</span>
           </div>
@@ -103,7 +105,11 @@ export function PlayerSeat({ player, isLocal, isActiveTurn, isWaiting, className
       <div className="mt-1 sm:mt-2 text-center flex flex-col items-center max-w-[80px] sm:max-w-none">
         <span className="text-xs sm:text-sm font-medium text-gray-200 flex items-center gap-1 truncate w-full justify-center">
           {player.pseudo}
-          {player.isHost && <span className="text-[8px] sm:text-[10px] bg-white/10 px-1 sm:px-1.5 py-0.5 rounded text-gray-400 uppercase">Hôte</span>}
+          {player.isHost && (
+            <span className="text-[8px] sm:text-[10px] bg-white/10 px-1 sm:px-1.5 py-0.5 rounded text-gray-400 uppercase">
+              {language === 'en' ? 'Host' : 'Hôte'}
+            </span>
+          )}
         </span>
         
         {!isWaiting && player.active && (
@@ -112,13 +118,15 @@ export function PlayerSeat({ player, isLocal, isActiveTurn, isWaiting, className
               {player.points} pt{player.points > 1 ? 's' : ''}
             </span>
             <span className="text-[8px] sm:text-[10px] text-gray-400 bg-white/5 px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
-              👕 {player.clothingRemaining} restant{player.clothingRemaining > 1 ? 's' : ''}
+              👕 {player.clothingRemaining} {player.clothingRemaining > 1 ? t('clothing_remaining_plural') : t('clothing_remaining_singular')}
             </span>
           </div>
         )}
         
         {!player.active && !isWaiting && (
-          <span className="text-[10px] sm:text-xs text-red-400 mt-1 italic">Éliminé</span>
+          <span className="text-[10px] sm:text-xs text-red-400 mt-1 italic">
+            {language === 'en' ? 'Eliminated' : 'Éliminé'}
+          </span>
         )}
       </div>
     </div>
