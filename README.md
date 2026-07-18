@@ -83,7 +83,7 @@ Ouvrez `http://localhost:5173` dans votre navigateur.
 - [x] **Paramètres In-Game** : Configuration complète dans le lobby (joueurs, vêtements initiaux, coût de rachat).
 - [x] **Validation Manche Suivante** : Bouton Prêt obligatoire pour les joueurs avant le lancement par l'hôte.
 - [x] **Effets Visuels de Showdown** : Animation dramatique de vêtement qui prend feu et brûle lorsqu'un joueur finit nu.
+- [x] **Gérer l'écran de pause** : faire en sorte que le bouton pause ne reste pas bloqué en pause
 
 ### 🔄 À venir (Planned)
 - [ ] **Version Anglaise (i18n)** : Traduction bilingue Français / Anglais.
-- [ ] **Gérer l'écran de pause** : faire en sorte que le bouton pause ne reste pas bloqué en pause

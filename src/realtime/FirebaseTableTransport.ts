@@ -403,7 +403,6 @@ export class FirebaseTableTransport implements ITableTransport {
       }
       case 'pause': {
         const paused = data.paused as boolean;
-        if (uid !== this.hostTable.hostId) break;
 
         this.clearHostTimers();
         if (paused) {

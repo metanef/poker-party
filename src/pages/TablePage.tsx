@@ -540,18 +540,14 @@ export default function TablePage() {
            <div className="bg-table-panel p-6 rounded-panel border border-table-border text-center shadow-2xl flex flex-col items-center">
              <h2 className="font-title text-xl text-white mb-2">Jeu en pause</h2>
              <p className="text-gray-400 text-sm mb-4">
-               {table.hostId === transport.localPlayerId 
-                 ? "La partie est suspendue."
-                 : "En attente de l'hôte pour reprendre la partie."}
+               La partie est suspendue.
              </p>
-             {table.hostId === transport.localPlayerId && (
-               <button
-                 onClick={() => transport.sendPause(false).catch(console.error)}
-                 className="bg-felt-accent text-table-bg font-title font-semibold px-6 py-2.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg cursor-pointer"
-               >
-                 Reprendre la partie
-               </button>
-             )}
+             <button
+               onClick={() => transport.sendPause(false).catch(console.error)}
+               className="bg-felt-accent text-table-bg font-title font-semibold px-6 py-2.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg cursor-pointer"
+             >
+               Reprendre la partie
+             </button>
            </div>
         </div>
       )}
