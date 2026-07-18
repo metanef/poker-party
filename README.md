@@ -87,4 +87,4 @@ Open `http://localhost:5173` in your browser.
 - [x] **English Translation (i18n)**: Bilingual French / English translations.
 
 ### 🔄 Planned
-- [ ] **Double or Nothing (Quitte ou Double)**: When a player loses their last clothing item, offer a fast 1-on-1 bonus round to try and recover everything or end up completely naked.
+- [ ] **Double or Nothing**: When a player loses their last clothing item, offer a fast 1-on-1 bonus round to try and recover everything or end up completely naked.

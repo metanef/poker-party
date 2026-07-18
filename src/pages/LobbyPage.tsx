@@ -12,8 +12,8 @@ export default function LobbyPage() {
   const [avatar, setAvatar] = useState(EMOJIS[0]);
   const [joinCode, setJoinCode] = useState('');
   
-  const [maxPlayers, setMaxPlayers] = useState(4);
-  const [startingClothing, setStartingClothing] = useState(6);
+  const [maxPlayers, setMaxPlayers] = useState(2);
+  const [startingClothing, setStartingClothing] = useState(3);
   const [buybackCost, setBuybackCost] = useState(3);
   
   const [openTables, setOpenTables] = useState<any[]>([]);
@@ -178,7 +178,7 @@ export default function LobbyPage() {
                     onChange={(e) => setStartingClothing(Number(e.target.value))}
                     className="w-full bg-white border border-gray-200 rounded-xl px-2 py-2.5 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-400"
                   >
-                    {[3, 4, 5, 6, 7, 8].map(n => <option key={n} value={n}>{n} 👕</option>)}
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => <option key={n} value={n}>{n} 👕</option>)}
                   </select>
                 </div>
                 <div>

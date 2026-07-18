@@ -124,7 +124,7 @@ export default function WaitingRoomPage({
                     }}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-felt-accent cursor-pointer"
                   >
-                    {[3, 4, 5, 6, 7, 8].map(n => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
                       <option key={n} value={n} className="bg-table-panel text-white">{n} 👕</option>
                     ))}
                   </select>
