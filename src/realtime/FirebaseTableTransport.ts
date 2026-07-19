@@ -258,7 +258,6 @@ export class FirebaseTableTransport implements ITableTransport {
       EXCHANGE_TIMEOUT_MS,
     );
     void this.hostPublish(this.hostTable);
-    this.triggerTemporaryBotActionsIfNeeded();
     this.scheduleHost(
       () => this.hostCheckExchangeCompletion(round),
       EXCHANGE_TIMEOUT_MS + 250,
@@ -420,7 +419,6 @@ export class FirebaseTableTransport implements ITableTransport {
               () => this.hostFinishExchangeRound(),
               remaining + 250,
             );
-            this.triggerTemporaryBotActionsIfNeeded();
           }
         }
         void this.hostPublish(this.hostTable);
@@ -563,7 +561,7 @@ export class FirebaseTableTransport implements ITableTransport {
         if (p.connected !== shouldBeConnected) {
           p.connected = shouldBeConnected;
           changed = true;
-          const status = shouldBeConnected ? "s'est connecté" : "s'est déconnecté (remplacé par un bot temporaire)";
+          const status = shouldBeConnected ? "s'est connecté" : "s'est déconnecté";
           this.hostTable = addLog(this.hostTable!, 'system', `${p.pseudo} ${status}.`);
         }
         return p;
@@ -572,50 +570,10 @@ export class FirebaseTableTransport implements ITableTransport {
       if (changed) {
         this.hostTable.players = updatedPlayers;
         void this.hostPublish(this.hostTable);
-        this.triggerTemporaryBotActionsIfNeeded();
       }
     };
     onValue(presenceRef, handler);
     this.presenceUnsub = () => off(presenceRef, 'value', handler);
-  }
-
-  private triggerTemporaryBotActionsIfNeeded(): void {
-    if (!this.hostTable || !isExchangeStage(this.hostTable.stage) || !this.hostDeck) return;
-
-    // Do not trigger bot actions if the host client itself just connected/reconnected in the last 5 seconds
-    if (Date.now() - this.lastConnectTime < 5000) {
-      return;
-    }
-
-    for (const player of this.hostTable.players) {
-      if (player.active && !player.connected && !player.hasActedThisRound) {
-        const playerId = player.id;
-        const delay = 8000 + Math.random() * 2000;
-        this.scheduleHost(() => {
-          if (!this.hostTable || !this.hostDeck) return;
-          const p = this.hostTable.players.find((x) => x.id === playerId);
-          if (!p || !p.active || p.connected || p.hasActedThisRound) return;
-
-          const choice: ExchangeChoice =
-            Math.random() < 0.4
-              ? { type: 'keep' }
-              : {
-                  type: 'change',
-                  cardIndices: Math.random() < 0.5 ? [0] : [0, 1],
-                };
-
-          const result = applyExchangeChoice(this.hostTable, playerId, choice, this.hostDeck);
-          if (result.valid) {
-            this.hostTable = result.table;
-            void this.hostPublish(this.hostTable);
-            if (isExchangeRoundComplete(this.hostTable, Date.now())) {
-              this.clearHostTimers();
-              this.hostFinishExchangeRound();
-            }
-          }
-        }, delay);
-      }
-    }
   }
 
   // ---------------------------------------------------------------------------
@@ -963,7 +921,6 @@ export class FirebaseTableTransport implements ITableTransport {
             () => this.hostFinishExchangeRound(),
             remaining + 250,
           );
-          this.triggerTemporaryBotActionsIfNeeded();
         }
       }
       await this.hostPublish(this.hostTable);

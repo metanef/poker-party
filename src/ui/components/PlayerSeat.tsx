@@ -82,7 +82,7 @@ export function PlayerSeat({ player, isLocal, isActiveTurn, isWaiting, className
         {!player.connected && (
           <div 
             className="absolute -top-1 -left-1 bg-rose-600 text-white rounded-full px-1.5 py-0.5 shadow-md border border-rose-500 flex items-center justify-center pointer-events-none" 
-            title={language === 'en' ? "Disconnected (Temporary AI)" : "Déconnecté (IA temporaire)"}
+            title={language === 'en' ? "Disconnected" : "Déconnecté"}
           >
             <span className="text-[7px] font-bold uppercase tracking-wider scale-90">OFF</span>
           </div>

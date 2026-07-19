@@ -7,7 +7,7 @@
   **A modern real-time multiplayer card game with symbolic stripping stakes.**
 
   [![Live Demo](https://img.shields.io/badge/LIVE_DEMO-PLAY_ONLINE-22c55e?style=for-the-badge&logo=githubpages&logoColor=white)](https://metanef.github.io/poker-party/)
-  [![v1.1](https://img.shields.io/badge/VERSION-1.1_STABLE-8b5cf6?style=for-the-badge)](https://github.com/metanef/poker-party)
+  [![v1.2](https://img.shields.io/badge/VERSION-1.2_STABLE-8b5cf6?style=for-the-badge)](https://github.com/metanef/poker-party)
 
   <br />
 
@@ -86,6 +86,6 @@ Open `http://localhost:5173` in your browser.
 - [x] **Pause screen management**: Ensure the pause button doesn't get stuck in the paused state.
 - [x] **English Translation (i18n)**: Bilingual French / English translations.
 - [x] **Link Sharing Fix**: Correctly include repository base path in shared URL and add `404.html` redirection for GitHub Pages routing.
+- [x] **Connection & Disconnection System**: Disabled temporary bot replacement on player disconnection (such as tab/app switching), allowing players to reconnect and act during the standard 20-second exchange timeout.
 
 ### 🔄 Planned
-- [ ] **connexion deconnexion system** : not working well, if you switch app it replace you by a bot , it should never replace you

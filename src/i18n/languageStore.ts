@@ -88,11 +88,11 @@ export function translateSystemLog(logContent: string, lang: Language): string {
     return `${pseudo} connected.`;
   }
 
-  // 3. Disconnected (bot replaced)
-  // e.g., "PlayerName s'est déconnecté (remplacé par un bot temporaire)."
-  if (text.endsWith(" s'est déconnecté (remplacé par un bot temporaire).")) {
-    const pseudo = text.substring(0, text.length - " s'est déconnecté (remplacé par un bot temporaire).".length);
-    return `${pseudo} disconnected (replaced by a temporary bot).`;
+  // 3. Disconnected
+  // e.g., "PlayerName s'est déconnecté."
+  if (text.endsWith(" s'est déconnecté.")) {
+    const pseudo = text.substring(0, text.length - " s'est déconnecté.".length);
+    return `${pseudo} disconnected.`;
   }
 
   // 4. Changed cards
