@@ -85,6 +85,7 @@ Open `http://localhost:5173` in your browser.
 - [x] **Showdown Visual Effects**: Dramatic burning clothes animation when a player ends up naked.
 - [x] **Pause screen management**: Ensure the pause button doesn't get stuck in the paused state.
 - [x] **English Translation (i18n)**: Bilingual French / English translations.
+- [x] **Link Sharing Fix**: Correctly include repository base path in shared URL and add `404.html` redirection for GitHub Pages routing.
 
 ### 🔄 Planned
-- [ ] **Double or Nothing**: When a player loses their last clothing item, offer a fast 1-on-1 bonus round to try and recover everything or end up completely naked.
+- [ ] **connexion deconnexion system** : not working well, if you switch app it replace you by a bot , it should never replace you

@@ -36,7 +36,9 @@ export default function WaitingRoomPage({
   const canStart = isHost && players.length >= 2 && players.every(p => p.isHost || p.ready);
 
   const handleCopyLink = () => {
-    const url = `${window.location.origin}/table/${code}`;
+    const base = import.meta.env.BASE_URL;
+    const path = `${base.endsWith('/') ? base : base + '/'}table/${code}`;
+    const url = `${window.location.origin}${path}`;
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
