@@ -12,7 +12,7 @@ export interface CreateTableParams {
   pseudo: string;
   avatar: string;
   maxPlayers: number;
-  startingClothing: number;
+  startingLives: number;
   buybackCost?: number;
 }
 
@@ -65,28 +65,25 @@ export interface ITableTransport {
   deleteTable(): Promise<void>;
 
   /** Host-only: updates the game settings in the lobby. */
-  updateTableSettings(params: { maxPlayers: number; startingClothing: number; buybackCost: number }): Promise<void>;
-
-  /** Records this player's explicit consent for the current table. */
-  sendConsent(): Promise<void>;
+  updateTableSettings(params: { maxPlayers: number; startingLives: number; buybackCost: number }): Promise<void>;
 
   /** Marks this player as ready in the waiting room. */
   sendReady(ready: boolean): Promise<void>;
 
-  /** Host-only: starts the game once >= 2 players are present and consenting. */
+  /** Host-only: starts the game once >= 2 players are present. */
   startGame(): Promise<void>;
 
   /** Host-only: starts the next hand/round after a showdown. */
   startNextHand(): Promise<void>;
 
-  /** Host-only: restarts the game after game over, resetting clothes and points. */
+  /** Host-only: restarts the game after game over, resetting lives and points. */
   restartGame(): Promise<void>;
 
   /** Sends this player's exchange decision as an intent -- never computed locally. */
   sendExchangeChoice(choice: ExchangeChoice): Promise<void>;
 
-  /** Host-only: a player at 3 points chooses to put back one clothing item. */
-  sendRestoreClothing(): Promise<void>;
+  /** Host-only: a player at buybackCost points chooses to recover one life. */
+  sendRestoreLife(): Promise<void>;
 
   /** Toggles pause. Any player may pause; resuming is host-only in the UI layer. */
   sendPause(paused: boolean): Promise<void>;

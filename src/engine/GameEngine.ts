@@ -194,7 +194,7 @@ export function nextExchangeRoundAfterReveal(stage: Stage): 1 | 2 | 3 | null {
 
 /**
  * Resolves the showdown (stage 8): evaluates all active players' best
- * 7-card hand, assigns +1 point to the winner, and a clothing loss to the
+ * 7-card hand, assigns +1 point to the winner, and a life loss to the
  * loser. Ties at either end are a no-op for that side, per the spec.
  */
 export function resolveShowdown(table: TableState): TableState {
@@ -229,9 +229,9 @@ export function resolveShowdown(table: TableState): TableState {
   let gameOverMessage: string | null = null;
   if (singleLoser) {
     const loserPlayer = next.players.find((p) => p.id === losers[0].player.id) as Player;
-    loserPlayer.clothingRemaining = Math.max(0, loserPlayer.clothingRemaining - 1);
-    if (loserPlayer.clothingRemaining === 0) {
-      gameOverMessage = `${loserPlayer.pseudo} n'a plus de vêtement à retirer.`;
+    loserPlayer.livesRemaining = Math.max(0, loserPlayer.livesRemaining - 1);
+    if (loserPlayer.livesRemaining === 0) {
+      gameOverMessage = `${loserPlayer.pseudo} n'a plus de vie.`;
     }
   }
 
@@ -276,7 +276,7 @@ export function resolveShowdown(table: TableState): TableState {
     loggedTable = addLog(
       loggedTable,
       'system',
-      `${loserPlayer.pseudo} perd la manche et retire un vêtement (👕 restants : ${loserPlayer.clothingRemaining}).`
+      `${loserPlayer.pseudo} perd la manche et perd une vie (❤️ restantes : ${loserPlayer.livesRemaining}).`
     );
   }
 
@@ -288,7 +288,7 @@ export function resolveShowdown(table: TableState): TableState {
 }
 
 /**
- * Restarts the game, resetting players' points to 0, resetting clothing to the starting clothing,
+ * Restarts the game, resetting players' points to 0, resetting lives to the starting lives,
  * clearing community cards, and setting stage back to 'lobby'.
  */
 export function restartGame(table: TableState): TableState {
@@ -302,7 +302,7 @@ export function restartGame(table: TableState): TableState {
   next.paused = false;
 
   for (const player of next.players) {
-    player.clothingRemaining = next.startingClothing;
+    player.livesRemaining = next.startingLives;
     player.points = 0;
     player.holeCards = [];
     player.hasActedThisRound = false;
@@ -320,20 +320,18 @@ export function restartGame(table: TableState): TableState {
 }
 
 /**
- * A player who has reached 3 points may choose to put back one clothing
- * item, resetting their points to 0. This is always an explicit player
- * choice, never automatic.
+ * A player who has reached the buyback cost may choose to recover one life, resetting their points.
  */
-export function restoreClothing(table: TableState, playerId: string): TableState {
+export function restoreLife(table: TableState, playerId: string): TableState {
   const player = table.players.find((p) => p.id === playerId);
   const cost = table.buybackCost ?? 3;
   if (!player || player.points < cost) return table;
   const next = cloneTable(table);
   const nextPlayer = next.players.find((p) => p.id === playerId) as Player;
-  nextPlayer.clothingRemaining += 1;
+  nextPlayer.livesRemaining += 1;
   nextPlayer.points -= cost;
   
-  const loggedTable = addLog(next, 'system', `${player.pseudo} a racheté un vêtement (👕 +1, score : ${nextPlayer.points}).`);
+  const loggedTable = addLog(next, 'system', `${player.pseudo} a récupéré une vie (❤️ +1, score : ${nextPlayer.points}).`);
   return loggedTable;
 }
 

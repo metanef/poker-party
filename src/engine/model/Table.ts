@@ -26,7 +26,7 @@ export interface TableState {
   code: string;
   hostId: string;
   maxPlayers: number;
-  startingClothing: number;
+  startingLives: number;
   buybackCost: number;
   stage: Stage;
   handNumber: number;
@@ -38,7 +38,7 @@ export interface TableState {
   exchangeDeadline: number | null;
   exchangeRound: 1 | 2 | 3 | null;
   lastHandResult: HandResult | null;
-  /** Set once a player has run out of clothing; ends the table. */
+  /** Set once a player has run out of lives; ends the table. */
   gameOverMessage: string | null;
   deckSize: number;
   createdAt: number;
@@ -49,7 +49,7 @@ export function createEmptyTable(params: {
   code: string;
   hostId: string;
   maxPlayers: number;
-  startingClothing: number;
+  startingLives: number;
   buybackCost?: number;
   createdAt: number;
 }): TableState {
@@ -57,7 +57,7 @@ export function createEmptyTable(params: {
     code: params.code,
     hostId: params.hostId,
     maxPlayers: params.maxPlayers,
-    startingClothing: params.startingClothing,
+    startingLives: params.startingLives,
     buybackCost: params.buybackCost ?? 3,
     stage: 'lobby',
     handNumber: 0,

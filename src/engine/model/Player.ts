@@ -11,13 +11,12 @@ export interface Player {
   seatIndex: number;
   isHost: boolean;
   connected: boolean;
-  consentGiven: boolean;
   ready: boolean;
   /** Private hole cards. Only ever sent to this player's own client. */
   holeCards: Card[];
   points: number;
-  clothingRemaining: number;
-  startingClothing?: number;
+  livesRemaining: number;
+  startingLives?: number;
   /** Folded/left the table entirely (kept seat but out of the game). */
   active: boolean;
   /** Whether this player has submitted their choice for the current exchange round. */
@@ -31,7 +30,7 @@ export function createPlayer(params: {
   avatar: string;
   seatIndex: number;
   isHost: boolean;
-  startingClothing: number;
+  startingLives: number;
 }): Player {
   return {
     id: params.id,
@@ -40,11 +39,10 @@ export function createPlayer(params: {
     seatIndex: params.seatIndex,
     isHost: params.isHost,
     connected: true,
-    consentGiven: false,
     ready: false,
     holeCards: [],
     points: 0,
-    clothingRemaining: params.startingClothing,
+    livesRemaining: params.startingLives,
     active: true,
     hasActedThisRound: false,
     lastChoice: null,

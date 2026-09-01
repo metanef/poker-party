@@ -2,14 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { useTableStore } from '@/store/tableStore';
 import { getTransport } from '@/ui/hooks/useTableSocket';
-import { ConsentModal } from '@/ui/components/ConsentModal';
 import WaitingRoomPage from './WaitingRoomPage';
 import { PlayerSeat } from '@/ui/components/PlayerSeat';
 import { ExchangeConsole } from '@/ui/components/ExchangeConsole';
 import { TurnTimer } from '@/ui/components/TurnTimer';
 import { EmotePicker } from '@/ui/components/EmotePicker';
 import { PauseButton } from '@/ui/components/PauseButton';
-import { HandResultBanner, BurningClothingAnimation } from '@/ui/components/HandResultBanner';
+import { HandResultBanner, LifeLostAnimation } from '@/ui/components/HandResultBanner';
 import { PlayingCard } from '@/ui/components/PlayingCard';
 import { SidebarChat } from '@/ui/components/SidebarChat';
 import { LogOut, Home, UserPlus, MessageSquare, Trophy, RefreshCw, Crown } from 'lucide-react';
@@ -230,11 +229,6 @@ export default function TablePage() {
   const localPlayer = table.players.find(p => p.id === transport.localPlayerId);
   if (!localPlayer) return null; // Should not happen after join
 
-  // 3. Consent check
-  if (!localPlayer.consentGiven) {
-    return <ConsentModal onConsented={() => {}} />; // Modal handles transport call
-  }
-
   // 4. Lobby stage
   if (table.stage === 'lobby') {
     return (
@@ -244,7 +238,7 @@ export default function TablePage() {
         hostId={table.hostId}
         localPlayerId={transport.localPlayerId}
         maxPlayers={table.maxPlayers}
-        startingClothing={table.startingClothing}
+        startingLives={table.startingLives}
         buybackCost={table.buybackCost ?? 3}
       />
     );
@@ -254,17 +248,17 @@ export default function TablePage() {
   if (table.gameOverMessage) {
     const isHost = table.hostId === transport.localPlayerId;
     const sortedPlayers = [...table.players].sort((a, b) => b.points - a.points);
-    const nakedPlayers = table.players.filter((p) => p.clothingRemaining === 0);
-    const localNaked = nakedPlayers.some((p) => p.id === transport.localPlayerId);
+    const eliminatedPlayers = table.players.filter((p) => p.livesRemaining === 0);
+    const localEliminated = eliminatedPlayers.some((p) => p.id === transport.localPlayerId);
 
     return (
       <div className="min-h-[100dvh] bg-table-bg flex items-center justify-center p-4 relative overflow-y-auto">
         <div className="bg-table-panel border border-table-border rounded-panel p-6 max-w-lg w-full text-center shadow-2xl flex flex-col gap-6 my-auto animate-fade-in">
           {/* Header */}
           <div className="flex flex-col items-center">
-            {localNaked ? (
+            {localEliminated ? (
               <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mb-4 relative overflow-hidden">
-                <BurningClothingAnimation className="scale-125" />
+                <LifeLostAnimation className="scale-125" />
               </div>
             ) : (
               <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center justify-center mb-4">
@@ -279,18 +273,18 @@ export default function TablePage() {
             </p>
           </div>
 
-          {/* Naked Announcement */}
-          {nakedPlayers.length > 0 && (
+          {/* Eliminated Announcement */}
+          {eliminatedPlayers.length > 0 && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center">
               <p className="text-sm text-red-400 font-medium leading-relaxed">
-                {localNaked ? (
-                  language === 'en' ? "🔞 You end up COMPLETELY NAKED!" : "🔞 Vous finissez COMPLÈTEMENT NU !"
+                {localEliminated ? (
+                  language === 'en' ? "💀 You ended up ELIMINATED!" : "💀 Vous finissez ÉLIMINÉ !"
                 ) : (
                   <>
-                    🔞 <span className="font-bold">{nakedPlayers.map(p => p.pseudo).join(', ')}</span>{' '}
-                    {nakedPlayers.length > 1 
-                      ? (language === 'en' ? " end up COMPLETELY NAKED!" : " finissent COMPLÈTEMENT NUS !") 
-                      : (language === 'en' ? " ends up COMPLETELY NAKED!" : " finit COMPLÈTEMENT NU !")}
+                    💀 <span className="font-bold">{eliminatedPlayers.map(p => p.pseudo).join(', ')}</span>{' '}
+                    {eliminatedPlayers.length > 1 
+                      ? (language === 'en' ? " ended up ELIMINATED!" : " finissent ÉLIMINÉS !") 
+                      : (language === 'en' ? " ended up ELIMINATED!" : " finit ÉLIMINÉ !")}
                   </>
                 )}
               </p>
@@ -300,7 +294,7 @@ export default function TablePage() {
           {/* Scoreboard List */}
           <div className="space-y-2 text-left">
             {sortedPlayers.map((player, index) => {
-              const isNaked = player.clothingRemaining === 0;
+              const isEliminated = player.livesRemaining === 0;
               const isPlayerLocal = player.id === transport.localPlayerId;
               const isPlayerHost = player.id === table.hostId;
 
@@ -338,9 +332,9 @@ export default function TablePage() {
                         {isPlayerHost && <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20 animate-pulse" />}
                       </span>
                       <span className="text-[10px] text-gray-500">
-                        {isNaked 
-                          ? (language === 'en' ? '🔞 Eliminated (Naked)' : '🔞 Éliminé (Nu)') 
-                          : `👕 ${player.clothingRemaining} ${player.clothingRemaining > 1 ? t('clothing_remaining_plural') : t('clothing_remaining_singular')}`}
+                        {isEliminated 
+                          ? (language === 'en' ? '💀 Eliminated' : '💀 Éliminé') 
+                          : `❤️ ${player.livesRemaining} ${player.livesRemaining > 1 ? t('lives_remaining_plural') : t('lives_remaining_singular')}`}
                       </span>
                     </div>
                   </div>
@@ -502,10 +496,10 @@ export default function TablePage() {
               isHost={table.hostId === transport.localPlayerId}
               onNextHand={() => transport.startNextHand().catch(console.error)}
               localPlayerPoints={localPlayer.points}
-              localPlayerClothingRemaining={localPlayer.clothingRemaining}
-              startingClothing={table.startingClothing}
+              localPlayerLivesRemaining={localPlayer.livesRemaining}
+              startingLives={table.startingLives}
               buybackCost={table.buybackCost ?? 3}
-              onRestoreClothing={() => transport.sendRestoreClothing().catch(console.error)}
+              onRestoreLife={() => transport.sendRestoreLife().catch(console.error)}
               onToggleReady={() => transport.sendReady(!localPlayer.ready).catch(console.error)}
             />
           </div>
@@ -527,15 +521,15 @@ export default function TablePage() {
              <span className="text-white font-medium text-xs md:text-sm">{localPlayer.pseudo}</span>
              <span className="text-rank-gold font-bold text-sm md:text-lg">{localPlayer.points} pts</span>
              <span className="text-[10px] md:text-xs text-gray-400">
-               👕 {localPlayer.clothingRemaining} {localPlayer.clothingRemaining > 1 ? t('clothing_remaining_plural') : t('clothing_remaining_singular')}
+               ❤️ {localPlayer.livesRemaining} {localPlayer.livesRemaining > 1 ? t('lives_remaining_plural') : t('lives_remaining_singular')}
              </span>
-             {localPlayer.points >= (table.buybackCost ?? 3) && (
+             {localPlayer.points >= (table.buybackCost ?? 3) && localPlayer.livesRemaining < table.startingLives && (
                <button
-                 onClick={() => transport.sendRestoreClothing().catch(console.error)}
+                 onClick={() => transport.sendRestoreLife().catch(console.error)}
                  className="text-[10px] md:text-xs bg-felt-accent text-table-bg font-title font-semibold px-2 md:px-3 py-1 md:py-1.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-lg whitespace-nowrap cursor-pointer"
-                 title={t('recover_clothing_title', { cost: table.buybackCost ?? 3 })}
+                 title={t('recover_life_title', { cost: table.buybackCost ?? 3 })}
                >
-                 {t('recover_clothing_btn')}
+                 {t('recover_life_btn')}
                </button>
              )}
            </div>

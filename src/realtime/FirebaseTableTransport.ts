@@ -27,7 +27,7 @@ import {
   nextExchangeRoundAfterReveal,
   pauseTable,
   resolveShowdown,
-  restoreClothing,
+  restoreLife,
   resumeTable,
   startHand,
   addLog,
@@ -344,7 +344,7 @@ export class FirebaseTableTransport implements ITableTransport {
             avatar: string;
             seatIndex: number;
             isHost: boolean;
-            startingClothing: number;
+            startingLives: number;
           };
           const newPlayer = createPlayer({
             id: playerData.id,
@@ -352,18 +352,10 @@ export class FirebaseTableTransport implements ITableTransport {
             avatar: playerData.avatar,
             seatIndex: this.hostTable.players.length,
             isHost: false,
-            startingClothing: this.hostTable.startingClothing,
+            startingLives: this.hostTable.startingLives,
           });
           this.hostTable.players.push(newPlayer);
           this.hostTable = addLog(this.hostTable, 'system', `${newPlayer.pseudo} a rejoint la table.`);
-          void this.hostPublish(this.hostTable);
-        }
-        break;
-      }
-      case 'consent': {
-        const player = this.hostTable.players.find((p) => p.id === uid);
-        if (player) {
-          player.consentGiven = true;
           void this.hostPublish(this.hostTable);
         }
         break;
@@ -395,8 +387,8 @@ export class FirebaseTableTransport implements ITableTransport {
         }
         break;
       }
-      case 'restoreClothing': {
-        this.hostTable = restoreClothing(this.hostTable, uid);
+      case 'restoreLife': {
+        this.hostTable = restoreLife(this.hostTable, uid);
         void this.hostPublish(this.hostTable);
         break;
       }
@@ -606,7 +598,7 @@ export class FirebaseTableTransport implements ITableTransport {
       code,
       hostId: uid,
       maxPlayers: params.maxPlayers,
-      startingClothing: params.startingClothing,
+      startingLives: params.startingLives,
       buybackCost: params.buybackCost,
       createdAt: Date.now(),
     });
@@ -617,9 +609,8 @@ export class FirebaseTableTransport implements ITableTransport {
       avatar: params.avatar,
       seatIndex: 0,
       isHost: true,
-      startingClothing: params.startingClothing,
+      startingLives: params.startingLives,
     });
-    host.consentGiven = true;
     host.ready = true;
     table.players.push(host);
 
@@ -682,7 +673,7 @@ export class FirebaseTableTransport implements ITableTransport {
         avatar,
         seatIndex: playerCount,
         isHost: false,
-        startingClothing: table.startingClothing,
+        startingLives: table.startingLives,
       });
 
       await set(this.intentRef(code, uid), {
@@ -786,7 +777,7 @@ export class FirebaseTableTransport implements ITableTransport {
     this.privateHandListeners.forEach((l) => l(null));
   }
 
-  async updateTableSettings(params: { maxPlayers: number; startingClothing: number; buybackCost: number }): Promise<void> {
+  async updateTableSettings(params: { maxPlayers: number; startingLives: number; buybackCost: number }): Promise<void> {
     await this.ensureAuth();
     if (!this.isHostClient || !this.hostTable) {
       throw new Error("Seul l'hote peut modifier les parametres de la table.");
@@ -796,30 +787,16 @@ export class FirebaseTableTransport implements ITableTransport {
     const resolvedMaxPlayers = Math.max(currentConnectedCount, params.maxPlayers);
 
     this.hostTable.maxPlayers = resolvedMaxPlayers;
-    this.hostTable.startingClothing = params.startingClothing;
+    this.hostTable.startingLives = params.startingLives;
     this.hostTable.buybackCost = params.buybackCost;
 
-    // Update existing players' starting clothing & remaining clothing in the lobby
+    // Update existing players' starting lives & remaining lives in the lobby
     for (const player of this.hostTable.players) {
-      player.startingClothing = params.startingClothing;
-      player.clothingRemaining = params.startingClothing;
+      player.startingLives = params.startingLives;
+      player.livesRemaining = params.startingLives;
     }
 
     await this.hostPublish(this.hostTable);
-  }
-
-  async sendConsent(): Promise<void> {
-    if (this.isHostClient && this.hostTable) {
-      const player = this.hostTable.players.find(
-        (p) => p.id === this._localPlayerId,
-      );
-      if (player) {
-        player.consentGiven = true;
-        await this.hostPublish(this.hostTable);
-      }
-      return;
-    }
-    await this.sendIntent({ type: 'consent' });
   }
 
   async sendReady(ready: boolean): Promise<void> {
@@ -894,13 +871,13 @@ export class FirebaseTableTransport implements ITableTransport {
     await this.sendIntent({ type: 'restartGame' });
   }
 
-  async sendRestoreClothing(): Promise<void> {
+  async sendRestoreLife(): Promise<void> {
     if (this.isHostClient && this.hostTable) {
-      this.hostTable = restoreClothing(this.hostTable, this._localPlayerId);
+      this.hostTable = restoreLife(this.hostTable, this._localPlayerId);
       await this.hostPublish(this.hostTable);
       return;
     }
-    await this.sendIntent({ type: 'restoreClothing' });
+    await this.sendIntent({ type: 'restoreLife' });
   }
 
   async sendPause(paused: boolean): Promise<void> {

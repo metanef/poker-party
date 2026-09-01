@@ -9,7 +9,7 @@ import {
   nextExchangeRoundAfterReveal,
   pauseTable,
   resolveShowdown,
-  restoreClothing,
+  restoreLife,
   resumeTable,
   startHand,
   addLog,
@@ -30,7 +30,7 @@ import type {
 } from './ITableTransport';
 
 const BOT_NAMES = ['Bot Camille', 'Bot Alex', 'Bot Sami'];
-const BOT_AVATARS = ['\u{1F916}', '\u{1F47E}', '\u{1F9E9}'];
+const BOT_AVATARS = ['🤖', '👾', '🧩'];
 const NEXT_HAND_DELAY_MS = 4500;
 const REVEAL_PAUSE_MS = 1600;
 
@@ -96,7 +96,7 @@ export class LocalTableTransport implements ITableTransport {
       code,
       hostId: this.localPlayerId,
       maxPlayers: params.maxPlayers,
-      startingClothing: params.startingClothing,
+      startingLives: params.startingLives,
       buybackCost: params.buybackCost,
       createdAt: Date.now(),
     });
@@ -107,7 +107,7 @@ export class LocalTableTransport implements ITableTransport {
       avatar: params.avatar,
       seatIndex: 0,
       isHost: true,
-      startingClothing: params.startingClothing,
+      startingLives: params.startingLives,
     });
     table.players.push(host);
 
@@ -119,9 +119,8 @@ export class LocalTableTransport implements ITableTransport {
         avatar: BOT_AVATARS[i % BOT_AVATARS.length],
         seatIndex: i + 1,
         isHost: false,
-        startingClothing: params.startingClothing,
+        startingLives: params.startingLives,
       });
-      bot.consentGiven = true;
       bot.ready = true;
       table.players.push(bot);
     }
@@ -164,18 +163,18 @@ export class LocalTableTransport implements ITableTransport {
     this.notifyPrivateHand();
   }
 
-  async updateTableSettings(params: { maxPlayers: number; startingClothing: number; buybackCost: number }): Promise<void> {
+  async updateTableSettings(params: { maxPlayers: number; startingLives: number; buybackCost: number }): Promise<void> {
     if (!this.table) return;
     this.table.maxPlayers = params.maxPlayers;
-    this.table.startingClothing = params.startingClothing;
+    this.table.startingLives = params.startingLives;
     this.table.buybackCost = params.buybackCost;
 
     // Adjust players and bots to match new maxPlayers
     const host = this.table.players.find(p => p.id === this.localPlayerId);
     if (!host) return;
 
-    host.startingClothing = params.startingClothing;
-    host.clothingRemaining = params.startingClothing;
+    host.startingLives = params.startingLives;
+    host.livesRemaining = params.startingLives;
 
     const newPlayers: Player[] = [host];
     const botCountNeeded = params.maxPlayers - 1;
@@ -184,8 +183,8 @@ export class LocalTableTransport implements ITableTransport {
     for (let i = 0; i < botCountNeeded; i++) {
       if (i < existingBots.length) {
         const bot = existingBots[i];
-        bot.startingClothing = params.startingClothing;
-        bot.clothingRemaining = params.startingClothing;
+        bot.startingLives = params.startingLives;
+        bot.livesRemaining = params.startingLives;
         bot.seatIndex = i + 1;
         newPlayers.push(bot);
       } else {
@@ -195,22 +194,14 @@ export class LocalTableTransport implements ITableTransport {
           avatar: BOT_AVATARS[i % BOT_AVATARS.length],
           seatIndex: i + 1,
           isHost: false,
-          startingClothing: params.startingClothing,
+          startingLives: params.startingLives,
         });
-        bot.consentGiven = true;
         bot.ready = true;
         newPlayers.push(bot);
       }
     }
 
     this.table.players = newPlayers;
-    this.notifyTable();
-  }
-
-  async sendConsent(): Promise<void> {
-    if (!this.table) return;
-    const me = this.table.players.find((p) => p.id === this.localPlayerId);
-    if (me) me.consentGiven = true;
     this.notifyTable();
   }
 
@@ -353,9 +344,9 @@ export class LocalTableTransport implements ITableTransport {
     }
   }
 
-  async sendRestoreClothing(): Promise<void> {
+  async sendRestoreLife(): Promise<void> {
     if (!this.table) return;
-    this.table = restoreClothing(this.table, this.localPlayerId);
+    this.table = restoreLife(this.table, this.localPlayerId);
     this.notifyTable();
   }
 

@@ -141,21 +141,21 @@ export function translateSystemLog(logContent: string, lang: Language): string {
     return `${names} win the round with: ${handEn}.`;
   }
 
-  // 8. Loser removes clothing
-  // e.g., "PlayerName perd la manche et retire un vêtement (👕 restants : 5)."
-  if (text.includes(" perd la manche et retire un vêtement (👕 restants : ")) {
-    const match = text.match(/^(.+?) perd la manche et retire un vêtement \(👕 restants : (\d+)\)\.$/);
+  // 8. Loser loses life
+  // e.g., "PlayerName perd la manche et perd 1 vie (❤️ restantes : 5)."
+  if (text.includes(" perd la manche et perd 1 vie (❤️ restantes : ")) {
+    const match = text.match(/^(.+?) perd la manche et perd 1 vie \(❤️ restantes : (\d+)\)\.$/);
     if (match) {
-      return `${match[1]} loses the round and removes a clothing item (👕 remaining: ${match[2]}).`;
+      return `${match[1]} loses the round and loses 1 life (❤️ remaining: ${match[2]}).`;
     }
   }
 
-  // 9. Restored clothing
-  // e.g., "PlayerName a racheté un vêtement (👕 +1, score : 4)."
-  if (text.includes(" a racheté un vêtement (👕 +1, score : ")) {
-    const match = text.match(/^(.+?) a racheté un vêtement \(👕 \+1, score : (\d+)\)\.$/);
+  // 9. Restored life
+  // e.g., "PlayerName a racheté 1 vie (❤️ +1, score : 4)."
+  if (text.includes(" a racheté 1 vie (❤️ +1, score : ")) {
+    const match = text.match(/^(.+?) a racheté 1 vie \(❤️ \+1, score : (\d+)\)\.$/);
     if (match) {
-      return `${match[1]} bought back a clothing item (👕 +1, score: ${match[2]}).`;
+      return `${match[1]} bought back 1 life (❤️ +1, score: ${match[2]}).`;
     }
   }
 

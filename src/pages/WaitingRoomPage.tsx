@@ -11,7 +11,7 @@ interface WaitingRoomPageProps {
   hostId: string;
   localPlayerId: string;
   maxPlayers: number;
-  startingClothing: number;
+  startingLives: number;
   buybackCost: number;
 }
 
@@ -21,7 +21,7 @@ export default function WaitingRoomPage({
   hostId,
   localPlayerId,
   maxPlayers,
-  startingClothing,
+  startingLives,
   buybackCost,
 }: WaitingRoomPageProps) {
   const [, setLocation] = useLocation();
@@ -106,7 +106,7 @@ export default function WaitingRoomPage({
                     value={maxPlayers}
                     onChange={(e) => {
                       const nextMax = Number(e.target.value);
-                      getTransport().updateTableSettings({ maxPlayers: nextMax, startingClothing, buybackCost }).catch(console.error);
+                      getTransport().updateTableSettings({ maxPlayers: nextMax, startingLives, buybackCost }).catch(console.error);
                     }}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-felt-accent cursor-pointer"
                   >
@@ -117,17 +117,17 @@ export default function WaitingRoomPage({
                 </div>
                 
                 <div>
-                  <label className="block text-[10px] text-gray-400 font-bold uppercase mb-1">{t('starting_clothing_label')}</label>
+                  <label className="block text-[10px] text-gray-400 font-bold uppercase mb-1">{t('starting_lives_label')}</label>
                   <select 
-                    value={startingClothing}
+                    value={startingLives}
                     onChange={(e) => {
-                      const nextClothing = Number(e.target.value);
-                      getTransport().updateTableSettings({ maxPlayers, startingClothing: nextClothing, buybackCost }).catch(console.error);
+                      const nextLives = Number(e.target.value);
+                      getTransport().updateTableSettings({ maxPlayers, startingLives: nextLives, buybackCost }).catch(console.error);
                     }}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-felt-accent cursor-pointer"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
-                      <option key={n} value={n} className="bg-table-panel text-white">{n} 👕</option>
+                      <option key={n} value={n} className="bg-table-panel text-white">{n} ❤️</option>
                     ))}
                   </select>
                 </div>
@@ -138,7 +138,7 @@ export default function WaitingRoomPage({
                     value={buybackCost}
                     onChange={(e) => {
                       const nextCost = Number(e.target.value);
-                      getTransport().updateTableSettings({ maxPlayers, startingClothing, buybackCost: nextCost }).catch(console.error);
+                      getTransport().updateTableSettings({ maxPlayers, startingLives, buybackCost: nextCost }).catch(console.error);
                     }}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-felt-accent cursor-pointer"
                   >
@@ -160,8 +160,8 @@ export default function WaitingRoomPage({
                   <span className="text-xs font-bold text-white mt-0.5 block">{maxPlayers} max</span>
                 </div>
                 <div className="bg-white/5 rounded-xl p-2.5 text-center">
-                  <span className="block text-[10px] text-gray-400 font-semibold uppercase">{t('starting_clothing_label')}</span>
-                  <span className="text-xs font-bold text-white mt-0.5 block">{startingClothing} 👕</span>
+                  <span className="block text-[10px] text-gray-400 font-semibold uppercase">{t('starting_lives_label')}</span>
+                  <span className="text-xs font-bold text-white mt-0.5 block">{startingLives} ❤️</span>
                 </div>
                 <div className="bg-white/5 rounded-xl p-2.5 text-center">
                   <span className="block text-[10px] text-gray-400 font-semibold uppercase">{t('buyback_cost_label')}</span>

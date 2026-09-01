@@ -5,9 +5,9 @@ import { Trophy, AlertTriangle, ArrowRight, RefreshCw, Check, Clock } from 'luci
 import { PlayingCard } from './PlayingCard';
 import { useLanguageStore, t, translateHandLabelFrToEn } from '@/i18n/languageStore';
 
-export function BurningClothingAnimation({ className = '' }: { className?: string }) {
+export function LifeLostAnimation({ className = '' }: { className?: string }) {
   const sparks = React.useMemo(() => {
-    const elements = ['🔥'];
+    const elements = ['💔', '❤️'];
     return Array.from({ length: 6 }).map((_, i) => {
       const left = 15 + Math.random() * 70;
       const delay = Math.random() * 0.8;
@@ -23,29 +23,23 @@ export function BurningClothingAnimation({ className = '' }: { className?: strin
   return (
     <div className={`relative w-10 h-10 flex items-center justify-center pointer-events-none ${className}`}>
       <style>{`
-        @keyframes burn-clothes {
+        @keyframes float-heart {
           0% {
             transform: scale(1) rotate(0deg);
-            filter: drop-shadow(0 0 2px #f97316);
+            filter: drop-shadow(0 0 2px #ef4444);
             opacity: 1;
           }
-          30% {
-            transform: scale(1.15) rotate(-8deg);
-            filter: drop-shadow(0 0 10px #ef4444) brightness(1.5) sepia(0.8) hue-rotate(-20deg);
+          50% {
+            transform: scale(1.2) rotate(-8deg);
+            filter: drop-shadow(0 0 8px #f43f5e);
             opacity: 1;
-          }
-          65% {
-            transform: scale(0.85) rotate(12deg) translateY(-6px);
-            filter: drop-shadow(0 0 15px #b91c1c) brightness(0.6) grayscale(0.5);
-            opacity: 0.8;
           }
           100% {
-            transform: scale(0.3) rotate(20deg) translateY(-20px);
-            filter: brightness(0.1) grayscale(1) blur(2px);
-            opacity: 0;
+            transform: scale(0.6) rotate(12deg) translateY(-10px);
+            opacity: 0.3;
           }
         }
-        @keyframes clothing-ember {
+        @keyframes heart-ember {
           0% {
             transform: translate3d(0, 0, 0) scale(1);
             opacity: 0;
@@ -68,7 +62,7 @@ export function BurningClothingAnimation({ className = '' }: { className?: strin
             bottom: '5px',
             left: `${s.left}%`,
             fontSize: `${s.size}px`,
-            animation: `clothing-ember ${s.duration}s ease-out ${s.delay}s infinite`,
+            animation: `heart-ember ${s.duration}s ease-out ${s.delay}s infinite`,
             '--x': `${s.x}px`,
             '--y': `${s.y}px`,
             zIndex: 10,
@@ -81,11 +75,11 @@ export function BurningClothingAnimation({ className = '' }: { className?: strin
       <div 
         className="text-2xl select-none"
         style={{
-          animation: 'burn-clothes 2.8s ease-in-out infinite',
+          animation: 'float-heart 2.8s ease-in-out infinite',
           zIndex: 5,
         }}
       >
-        👕
+        💔
       </div>
     </div>
   );
@@ -98,10 +92,10 @@ interface HandResultBannerProps {
   isHost: boolean;
   onNextHand: () => void;
   localPlayerPoints: number;
-  localPlayerClothingRemaining: number;
-  startingClothing: number;
+  localPlayerLivesRemaining: number;
+  startingLives: number;
   buybackCost: number;
-  onRestoreClothing: () => void;
+  onRestoreLife: () => void;
   onToggleReady: () => void;
 }
 
@@ -112,15 +106,15 @@ export function HandResultBanner({
   isHost,
   onNextHand,
   localPlayerPoints,
-  localPlayerClothingRemaining,
-  startingClothing,
+  localPlayerLivesRemaining,
+  startingLives,
   buybackCost,
-  onRestoreClothing,
+  onRestoreLife,
   onToggleReady,
 }: HandResultBannerProps) {
   const isWinner = result.winnerIds.includes(localPlayerId);
   const isLoser = result.loserIds.includes(localPlayerId);
-  const localNude = isLoser && localPlayerClothingRemaining === 0;
+  const localEliminated = isLoser && localPlayerLivesRemaining === 0;
 
   const host = players.find(p => p.isHost);
   const hostId = host?.id || '';
@@ -141,24 +135,24 @@ export function HandResultBanner({
   const winnerNames = result.winnerIds.map(getName).join(', ');
   const loserNames = result.loserIds.map(getName).join(', ');
 
-  const canBuyback = localPlayerPoints >= buybackCost && localPlayerClothingRemaining < startingClothing;
+  const canBuyback = localPlayerPoints >= buybackCost && localPlayerLivesRemaining < startingLives;
 
   return (
     <div className="w-full max-w-sm my-auto mx-auto bg-table-panel border border-table-border rounded-panel p-6 shadow-2xl flex flex-col items-center text-center space-y-4 relative">
       {/* Top Banner (Action for local player) */}
       <div className="flex flex-col items-center w-full">
-        {localNude ? (
+        {localEliminated ? (
           <div className="bg-gradient-to-br from-red-950/60 via-red-900/40 to-orange-950/60 border border-red-500/40 rounded-xl p-4 w-full flex items-center justify-between relative overflow-hidden animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.25)]">
-            <BurningClothingAnimation className="z-20 shrink-0" />
+            <LifeLostAnimation className="z-20 shrink-0" />
             <div className="flex flex-col text-center z-20">
               <h3 className="font-title font-black text-red-400 text-lg tracking-wide uppercase drop-shadow">
-                {language === 'en' ? "You are naked!" : "Vous êtes nu !"}
+                {language === 'en' ? "Eliminated!" : "Éliminé !"}
               </h3>
               <p className="text-xs text-orange-300 mt-1 font-semibold">
-                {language === 'en' ? "All your clothes burned!" : "Tous vos vêtements ont brûlé !"}
+                {language === 'en' ? "You have no lives remaining!" : "Vous n'avez plus de vies !"}
               </p>
             </div>
-            <BurningClothingAnimation className="z-20 shrink-0" />
+            <LifeLostAnimation className="z-20 shrink-0" />
           </div>
         ) : isLoser ? (
           <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 w-full flex flex-col items-center">
@@ -167,7 +161,7 @@ export function HandResultBanner({
               {language === 'en' ? "You lost!" : "Vous avez perdu !"}
             </h3>
             <p className="text-sm text-red-300 mt-1">
-              {language === 'en' ? "Remove a clothing item." : "Retirez un vêtement."}
+              {language === 'en' ? "You lost 1 life." : "Vous perdez 1 vie."}
             </p>
           </div>
         ) : result.winnerIds.includes(localPlayerId) ? (
@@ -209,7 +203,7 @@ export function HandResultBanner({
             const isLocal = playerId === localPlayerId;
             const hasWon = result.winnerIds.includes(playerId);
             const hasLost = result.loserIds.includes(playerId);
-            const isNude = player.clothingRemaining === 0;
+            const isEliminated = player.livesRemaining === 0;
             
             const displayHandLabel = language === 'en' ? translateHandLabelFrToEn(handLabel) : handLabel;
 
@@ -220,7 +214,7 @@ export function HandResultBanner({
                   isLocal 
                     ? 'bg-felt-accent/10 border-felt-accent/30' 
                     : 'bg-black/20 border-white/5'
-                } ${isNude ? 'border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.15)]' : ''}`}
+                } ${isEliminated ? 'border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.15)]' : ''}`}
               >
                 <div className="flex items-center justify-between z-20">
                   <div className="flex items-center gap-1.5">
@@ -228,9 +222,9 @@ export function HandResultBanner({
                     <span className={`text-xs font-semibold ${isLocal ? 'text-felt-accent' : 'text-white'} truncate max-w-[120px]`}>
                       {player.pseudo} {isLocal && t('you_suffix')}
                     </span>
-                    {isNude && (
+                    {isEliminated && (
                       <span className="text-[9px] bg-red-600/90 text-white font-title px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold animate-pulse flex items-center gap-0.5">
-                        {language === 'en' ? '🔥 NAKED' : '🔥 NU'}
+                        {language === 'en' ? '💀 ELIMINATED' : '💀 ÉLIMINÉ'}
                       </span>
                     )}
                   </div>
@@ -242,9 +236,9 @@ export function HandResultBanner({
                     )}
                     {hasLost && (
                       <div className="flex items-center gap-0.5">
-                        {isNude && <BurningClothingAnimation className="scale-75 -my-3 -mx-2" />}
+                        {isEliminated && <LifeLostAnimation className="scale-75 -my-3 -mx-2" />}
                         <span className="text-[9px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded-full border border-red-500/20 font-bold uppercase tracking-wider">
-                          {language === 'en' ? 'Loses (-1 👕)' : 'Perd (-1 👕)'}
+                          {language === 'en' ? 'Loses (-1 ❤️)' : 'Perd (-1 ❤️)'}
                         </span>
                       </div>
                     )}
@@ -277,14 +271,14 @@ export function HandResultBanner({
       {/* Marché de rachat Section */}
       <div 
         className={`w-full bg-black/20 border border-white/5 rounded-xl p-3 flex flex-col items-center gap-2 ${
-          localPlayerClothingRemaining >= startingClothing ? 'invisible pointer-events-none' : ''
+          localPlayerLivesRemaining >= startingLives ? 'invisible pointer-events-none' : ''
         }`}
       >
         <h4 className="text-xs font-bold text-amber-400 uppercase tracking-widest flex items-center gap-1">
           {language === 'en' ? "🛍️ Buyback Market" : "🛍️ Marché de rachat"}
         </h4>
         <p className="text-[10px] text-gray-400">
-          {language === 'en' ? "Get back 1 clothing item." : "Récupérer 1 vêtement."}
+          {language === 'en' ? "Recover 1 life." : "Récupérer 1 vie."}
         </p>
         
         {localPlayerPoints < buybackCost ? (
@@ -298,13 +292,13 @@ export function HandResultBanner({
           </button>
         ) : (
           <button
-            onClick={onRestoreClothing}
+            onClick={onRestoreLife}
             className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-table-bg font-title font-bold text-xs py-2 px-3 rounded-lg transition-all active:scale-95 shadow-md flex items-center justify-center gap-1.5 hover:shadow-amber-500/10 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" />
             {language === 'en' 
-              ? `Buy back 1 clothing item (-${buybackCost} pts)` 
-              : `Racheter 1 vêtement (-${buybackCost} pts)`}
+              ? `Buy back 1 life (-${buybackCost} pts)` 
+              : `Racheter 1 vie (-${buybackCost} pts)`}
           </button>
         )}
       </div>

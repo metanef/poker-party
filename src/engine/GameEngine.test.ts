@@ -8,7 +8,7 @@ import {
   beginExchangeRound,
   finalizeExchangeRound,
   resolveShowdown,
-  restoreClothing,
+  restoreLife,
   startHand,
 } from './GameEngine';
 
@@ -17,7 +17,7 @@ function makeTable(playerCount: number) {
     code: 'TEST1',
     hostId: 'p0',
     maxPlayers: playerCount,
-    startingClothing: 6,
+    startingLives: 6,
     createdAt: Date.now(),
   });
   for (let i = 0; i < playerCount; i++) {
@@ -28,7 +28,7 @@ function makeTable(playerCount: number) {
         avatar: '\u{1F642}',
         seatIndex: i,
         isHost: i === 0,
-        startingClothing: 6,
+        startingLives: 6,
       }),
     );
   }
@@ -118,17 +118,17 @@ describe('a full hand runs through all 8 fixed stages in order', () => {
   });
 });
 
-describe('the 3-point clothing restoration rule', () => {
-  it('lets a player at 3+ points put back one clothing item and subtracts 3 points', () => {
+describe('the 3-point life restoration rule', () => {
+  it('lets a player at 3+ points recover one life and subtracts 3 points', () => {
     let table = makeTable(2);
     const player = table.players.find((p) => p.id === 'p0')!;
     player.points = 4;
-    player.clothingRemaining = 4;
+    player.livesRemaining = 4;
 
-    table = restoreClothing(table, 'p0');
+    table = restoreLife(table, 'p0');
 
     const updated = table.players.find((p) => p.id === 'p0')!;
-    expect(updated.clothingRemaining).toBe(5);
+    expect(updated.livesRemaining).toBe(5);
     expect(updated.points).toBe(1);
   });
 
@@ -136,26 +136,26 @@ describe('the 3-point clothing restoration rule', () => {
     let table = makeTable(2);
     const player = table.players.find((p) => p.id === 'p0')!;
     player.points = 1;
-    player.clothingRemaining = 4;
+    player.livesRemaining = 4;
 
-    table = restoreClothing(table, 'p0');
+    table = restoreLife(table, 'p0');
 
     const updated = table.players.find((p) => p.id === 'p0')!;
-    expect(updated.clothingRemaining).toBe(4);
+    expect(updated.livesRemaining).toBe(4);
     expect(updated.points).toBe(1);
   });
 
-  it('respects a custom buybackCost when restoring clothing', () => {
+  it('respects a custom buybackCost when restoring a life', () => {
     let table = makeTable(2);
     table.buybackCost = 2;
     const player = table.players.find((p) => p.id === 'p0')!;
     player.points = 2;
-    player.clothingRemaining = 4;
+    player.livesRemaining = 4;
 
-    table = restoreClothing(table, 'p0');
+    table = restoreLife(table, 'p0');
 
     const updated = table.players.find((p) => p.id === 'p0')!;
-    expect(updated.clothingRemaining).toBe(5);
+    expect(updated.livesRemaining).toBe(5);
     expect(updated.points).toBe(0);
   });
 });
@@ -175,7 +175,8 @@ describe('resolveShowdown', () => {
         pseudo: 'Bot 1',
         avatar: '🤖',
         seatIndex: 3,
-        startingClothing: 6,
+        isHost: false,
+        startingLives: 6,
       })
     );
     
